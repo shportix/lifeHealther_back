@@ -7,8 +7,8 @@ services:
   - type: web
     name: lifeHealther
     env: python
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn mysite.wsgi:application"
+    buildCommand: "manage.py"
+    startCommand: "runserver"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
