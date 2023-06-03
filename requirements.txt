@@ -1,4 +1,4 @@
-pip-upgrade
+pip==23.1.2
 asgiref==3.6.0
 dj-database-url==2.0.0
 Django==4.2.1
