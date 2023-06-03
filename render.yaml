@@ -7,7 +7,9 @@ services:
   - type: web
     name: lifeHealther
     env: python
-    buildCommand: "python manage.py runserver"
+    buildCommand:
+    "pip install -r requirements.txt
+    python manage.py runserver"
     startCommand: "runserver"
     envVars:
       - key: DATABASE_URL
