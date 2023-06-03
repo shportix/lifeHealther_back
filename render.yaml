@@ -7,7 +7,7 @@ services:
   - type: web
     name: lifeHealther
     env: python
-    buildCommand: "manage.py"
+    buildCommand: "python manage.py runserver"
     startCommand: "runserver"
     envVars:
       - key: DATABASE_URL
