@@ -1,7 +1,7 @@
 databases:
   - name: lifeHealtherDB
     databaseName: lifeHealtherDB
-    user: lifeHealtherDB
+    user: root
 
 services:
   - type: web
