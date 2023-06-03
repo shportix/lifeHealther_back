@@ -3,6 +3,7 @@ URL configuration for health_care_backend project.
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from lifeHealther.views import (
     api_create_user_view,
     api_get_user_view,
@@ -121,3 +122,5 @@ urlpatterns = [
     path('subscription/<int:user_id>/delete', api_delete_subscription_view),
     path('subscription/<int:user_id>/update', api_update_subscription_view),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
