@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import pymongo
+from bson.json_util import dumps
 from lifeHealther.models import (
     MyUser,
     Administrator,
@@ -58,7 +59,9 @@ def api_create_test_mongo_view(request):
     # Insert the documents
     collection_name.insert_many([medicine_1, medicine_2])
     res = collection_name.find({})
-    return  Response({}, status=status.HTTP_200_OK)
+    list_res = list(res)
+    json_res = dumps(list_res)
+    return  Response(json_res, status=status.HTTP_200_OK)
 
 
 # //////user//////
