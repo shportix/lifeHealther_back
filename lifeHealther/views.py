@@ -58,7 +58,7 @@ def api_create_test_mongo_view(request):
     # Insert the documents
     collection_name.insert_many([medicine_1, medicine_2])
     res = collection_name.find({})
-    return  Response(res, status=status.HTTP_200_OK)
+    return  Response({}, status=status.HTTP_200_OK)
 
 
 # //////user//////
