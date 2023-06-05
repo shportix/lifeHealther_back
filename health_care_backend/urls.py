@@ -60,7 +60,8 @@ from lifeHealther.views import (
     api_create_subscription_view,
     api_get_subscription_view,
     api_update_subscription_view,
-    api_delete_subscription_view
+    api_delete_subscription_view,
+    api_create_test_mongo_view,
 )
 
 urlpatterns = [
@@ -121,6 +122,7 @@ urlpatterns = [
     path('subscription/<int:user_id>', api_get_subscription_view),
     path('subscription/<int:user_id>/delete', api_delete_subscription_view),
     path('subscription/<int:user_id>/update', api_update_subscription_view),
+    path('test_mongo',api_create_test_mongo_view),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

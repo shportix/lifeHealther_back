@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import pymongo
 from lifeHealther.models import (
     MyUser,
     Administrator,
@@ -32,6 +33,31 @@ from lifeHealther.api.serializers import (
     SponsorSubscriptionSerializer,
     SponsorTierContentSerializer,
 )
+
+
+#test mongo
+@api_view(['POST', ])
+def api_create_test_mongo_view(request):
+    client = pymongo.MongoClient('mongodb+srv://lifehealther:DmdIHgLhwpJDJ6Sg@lifehealthermongodb.vtllcje.mongodb.net/')
+    dbname = client['lifehealthermongodb']
+    collection_name = dbname["medicinedetails"]
+    medicine_1 = {
+        "medicine_id": "RR000123456",
+        "common_name": "Paracetamol",
+        "scientific_name": "",
+        "available": "Y",
+        "category": "fever"
+    }
+    medicine_2 = {
+        "medicine_id": "RR000342522",
+        "common_name": "Metformin",
+        "scientific_name": "",
+        "available": "Y",
+        "category": "type 2 diabetes"
+    }
+    # Insert the documents
+    collection_name.insert_many([medicine_1, medicine_2])
+    return  collection_name.find({})
 
 
 # //////user//////
