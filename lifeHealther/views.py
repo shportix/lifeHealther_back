@@ -43,7 +43,7 @@ def api_create_test_mongo_view(request):
     dbname = client['lifehealthermongodb']
     collection_name = dbname["medicinedetails"]
     medicine_1 = {
-        "medicine_id": "RR000123456",
+        "medicine_id": 1,
         "common_name": "Paracetamol",
         "scientific_name": "",
         "available": "Y",
