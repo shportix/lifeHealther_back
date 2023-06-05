@@ -36,7 +36,7 @@ from lifeHealther.api.serializers import (
 
 
 #test mongo
-@api_view(['POST', ])
+@api_view(['GET', ])
 def api_create_test_mongo_view(request):
     client = pymongo.MongoClient('mongodb+srv://lifehealther:DmdIHgLhwpJDJ6Sg@lifehealthermongodb.vtllcje.mongodb.net/')
     dbname = client['lifehealthermongodb']
