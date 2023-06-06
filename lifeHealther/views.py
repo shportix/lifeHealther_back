@@ -936,8 +936,8 @@ def api_registration(request):
             creator_create = requests.post("https://lifehealther.onrender.com/creator/create", data=user_data)
             if creator_create.status_code != status.HTTP_201_CREATED:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-        Response(status=status.HTTP_200_OK)
-    Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 
