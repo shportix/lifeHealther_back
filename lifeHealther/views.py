@@ -132,8 +132,8 @@ def api_create_my_user_view(request):
     my_user = MyUser()
     if request.method == "POST":
         serializer = MyUserSerializer(my_user, data=request.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             try:
                 serializer.save()
             except Exception:
