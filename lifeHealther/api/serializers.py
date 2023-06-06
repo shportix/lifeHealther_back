@@ -26,7 +26,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class MyUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MyUser
-        fields = ['id', 'role']
+        fields = ['id_id', 'role']
 #
 
 class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
