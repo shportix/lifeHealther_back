@@ -143,7 +143,6 @@ def api_create_my_user_view(request):
 
 @api_view(['GET', ])
 def api_get_my_user_view(request, my_user_id):
-    return Response(status=status.HTTP_400_BAD_REQUEST)
     try:
         my_user = MyUser.objects.get(id_id=my_user_id)
     except MyUser.DoesNotExist:
