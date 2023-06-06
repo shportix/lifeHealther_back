@@ -143,15 +143,17 @@ def api_create_my_user_view(request):
 
 @api_view(['GET', ])
 def api_get_my_user_view(request, my_user_id):
-    return Response(status=status.HTTP_400_BAD_REQUEST)
     try:
-        my_user = MyUser.objects.get(id_id=my_user_id)
+        my_user = MyUser.objects.get(id=my_user_id)
     except MyUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = MyUserSerializer(my_user)
-        return Response(serializer.data)
+        user_data = {
+            "id": my_user.id,
+            "role": my_user.role
+        }
+        return Response(user_data)
 
 
 @api_view(['PUT', ])
