@@ -43,7 +43,7 @@ class Customer(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
     )
-    payment_details = models.CharField(max_length=400)
+    payment_details = models.CharField(blank=True, max_length=400)
 
 
 class Creator(models.Model):
