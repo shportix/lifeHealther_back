@@ -910,11 +910,14 @@ def api_delete_subscription_view(request, subscription_id):
 def api_registration(request):
     serializer = RegistrationSerializers(data=request.data)
     if serializer.is_valid():
+        print("/")
         user_data = {
             "username": request.data["login"],
             "password": request.data["password"]
         }
+        print("//")
         user_create = requests.post("https://lifehealther.onrender.com/user/create", data=user_data)
+        print("///")
         if user_create.status_code != status.HTTP_201_CREATED:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         my_user_data = {
