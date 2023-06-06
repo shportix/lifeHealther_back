@@ -20,13 +20,13 @@ from lifeHealther.models import (
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['id_id', 'username', 'password']
+        fields = ['id', 'username', 'password']
 
 
 class MyUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MyUser
-        fields = ['id', 'role']
+        fields = ['id_id', 'role']
 
 
 class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
