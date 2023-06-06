@@ -131,8 +131,8 @@ def api_delete_user_view(request, user_id):
 def api_create_my_user_view(request):
     my_user = MyUser()
     if request.method == "POST":
+        return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = MyUserSerializer(my_user, data=request.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             try:
                 serializer.save()
