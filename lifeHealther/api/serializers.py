@@ -24,9 +24,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MyUserSerializer(serializers.HyperlinkedModelSerializer):
+    user = UserSerializer(required=True)
     class Meta:
         model = MyUser
-        fields = ['id_id', 'role']
+        fields = ['user', 'role']
+
+    def create(self, validated_data):
+        """
+        Overriding the default create method of the Model serializer.
+        :param validated_data: data containing all the details of student
+        :return: returns a successfully created student record
+        """
+        user_data = validated_data.pop('user')
+        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
+        my_user, created = MyUser.objects.update_or_create(id=user,
+                                                                role=validated_data.pop('role'))
+        return my_user
 #
 
 class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
