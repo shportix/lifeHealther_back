@@ -9,7 +9,7 @@ class MyUser(models.Model):
         ("Cr", "Creator"),
         ("Cu", "Customer"),
     ]
-    id_id = models.OneToOneField(
+    id = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         primary_key=True,
