@@ -99,3 +99,8 @@ class SponsorTierContentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = SponsorTierContent
         fields = ['id', 'content', 'sponsor tier']
+
+
+class RegistrationSerializers(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        fields = ['login', 'role', 'password']

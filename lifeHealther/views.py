@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import pymongo
 from bson.json_util import dumps
+import requests
 from lifeHealther.models import (
     MyUser,
     Administrator,
@@ -33,6 +34,7 @@ from lifeHealther.api.serializers import (
     CommentLikeSerializer,
     SponsorSubscriptionSerializer,
     SponsorTierContentSerializer,
+    RegistrationSerializers
 )
 
 
@@ -902,3 +904,41 @@ def api_delete_subscription_view(request, subscription_id):
         else:
             data["failure"] = "delete failed"
         return Response(data=data)
+
+
+@api_view(['POST', ])
+def api_registration(request):
+    serializer = RegistrationSerializers(data=request.data)
+    if serializer.is_valid():
+        user_data = {
+            "username": request.data["username"],
+            "password": request.data["password"]
+        }
+        user_create = requests.post("https://lifehealther.onrender.com/user/create", data=user_data)
+        if user_create.status_code != status.HTTP_201_CREATED:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        my_user_data = {
+            "id": user_create.json()["id"],
+            "role": request.data["role"]
+        }
+        my_user_create = requests.post("https://lifehealther.onrender.com/my_user/create", data=my_user_data)
+        if my_user_create.status_code != status.HTTP_201_CREATED:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_data = {
+            "id": user_create.json()["id"],
+            "payment details": ""
+        }
+        if request.data["role"] == "customer":
+            customer_create = requests.post("https://lifehealther.onrender.com/customer/create", data=user_data)
+            if customer_create.status_code != status.HTTP_201_CREATED:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            creator_create = requests.post("https://lifehealther.onrender.com/creator/create", data=user_data)
+            if creator_create.status_code != status.HTTP_201_CREATED:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        Response(status=status.HTTP_200_OK)
+    Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

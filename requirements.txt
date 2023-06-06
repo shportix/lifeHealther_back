@@ -10,4 +10,5 @@ typing_extensions==4.6.3
 tzdata==2023.3
 dnspython==2.3.0
 pymongo==4.3.3
+requests==2.31.0
 
