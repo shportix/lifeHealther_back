@@ -5,6 +5,7 @@ from rest_framework.response import Response
 import pymongo
 from bson.json_util import dumps
 import requests
+import hashlib
 from lifeHealther.models import (
     MyUser,
     Administrator,
@@ -73,6 +74,8 @@ def api_create_user_view(request):
 
     if request.method == "POST":
         serializer = UserSerializer(user, data=request.data)
+        h = hashlib.sha3_256
+        serializer.data["password"] = h.hexdigest()
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
