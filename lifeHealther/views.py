@@ -144,7 +144,7 @@ def api_create_my_user_view(request):
 @api_view(['GET', ])
 def api_get_my_user_view(request, my_user_id):
     try:
-        my_user = MyUser.objects.get(id=my_user_id)
+        my_user = MyUser.objects.get(id_id=my_user_id)
     except MyUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
