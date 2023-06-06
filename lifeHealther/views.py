@@ -133,18 +133,19 @@ def api_create_my_user_view(request):
     if request.method == "POST":
         serializer = MyUserSerializer(my_user, data=request.data)
         if serializer.is_valid():
-            try:
-                serializer.create()
-            except Exception:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            my_user = serializer.create(validated_data=request.data)
+            my_user_data = {
+                "id": my_user.id_id,
+                "role": my_user.role
+            }
+            return Response(my_user_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])
 def api_get_my_user_view(request, my_user_id):
     try:
-        my_user = MyUser.objects.get(id=my_user_id)
+        my_user = MyUser.objects.get(id_id=my_user_id)
     except MyUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -153,7 +154,7 @@ def api_get_my_user_view(request, my_user_id):
             "id": my_user.id,
             "role": my_user.role
         }
-        return Response(user_data)
+        return Response(data=user_data)
 
 
 @api_view(['PUT', ])

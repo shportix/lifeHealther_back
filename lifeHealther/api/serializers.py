@@ -24,10 +24,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MyUserSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(required=True)
+    id = UserSerializer(required=True)
     class Meta:
         model = MyUser
-        fields = ['user', 'role']
+        fields = ['id', 'role']
 
     def create(self, validated_data):
         """
@@ -35,9 +35,9 @@ class MyUserSerializer(serializers.HyperlinkedModelSerializer):
         :param validated_data: data containing all the details of student
         :return: returns a successfully created student record
         """
-        user_data = validated_data.pop('user')
-        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
-        my_user, created = MyUser.objects.update_or_create(id=user,
+        user_data = validated_data.pop('id')
+        id = UserSerializer.create(UserSerializer(), validated_data=user_data)
+        my_user, created = MyUser.objects.update_or_create(id=id,
                                                                 role=validated_data.pop('role'))
         return my_user
 #
