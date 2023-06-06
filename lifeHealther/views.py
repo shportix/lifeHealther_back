@@ -135,6 +135,7 @@ def api_create_my_user_view(request):
         if serializer.is_valid():
             try:
                 serializer.create()
+            #
             except Exception:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
