@@ -911,7 +911,7 @@ def api_registration(request):
     serializer = RegistrationSerializers(data=request.data)
     if serializer.is_valid():
         user_data = {
-            "username": request.data["username"],
+            "username": request.data["login"],
             "password": request.data["password"]
         }
         user_create = requests.post("https://lifehealther.onrender.com/user/create", data=user_data)
