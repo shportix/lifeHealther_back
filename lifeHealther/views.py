@@ -133,6 +133,7 @@ def api_create_my_user_view(request):
     if request.method == "POST":
         serializer = MyUserSerializer(my_user, data=request.data)
         if serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             try:
                 serializer.save()
             except Exception:
