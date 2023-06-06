@@ -37,7 +37,7 @@ class MyUserSerializer(serializers.HyperlinkedModelSerializer):
         """
         user_data = validated_data.pop('user')
         user = UserSerializer.create(UserSerializer(), validated_data=user_data)
-        my_user, created = MyUser.objects.update_or_create(id_id=user,
+        my_user, created = MyUser.objects.update_or_create(id=user,
                                                                 role=validated_data.pop('role'))
         return my_user
 #
