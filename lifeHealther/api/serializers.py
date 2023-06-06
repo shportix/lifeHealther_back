@@ -30,11 +30,6 @@ class MyUserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'role']
 
     def create(self, validated_data):
-        """
-        Overriding the default create method of the Model serializer.
-        :param validated_data: data containing all the details of student
-        :return: returns a successfully created student record
-        """
         user_data = validated_data.pop('id')
         id = UserSerializer.create(UserSerializer(), validated_data=user_data)
         my_user, created = MyUser.objects.update_or_create(id=id,
@@ -49,9 +44,17 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
+    id = MyUserSerializer(required=True)
     class Meta:
         model = Customer
-        fields = ['id', 'payment details']
+        fields = ['id']
+
+    def create(self, validated_data):
+        my_user_data = validated_data.pop('id')
+        id = MyUserSerializer.create(MyUserSerializer(), validated_data=my_user_data)
+        customer, created = Customer.objects.update_or_create(id=id,
+                                                                payment_details=" ")
+        return customer
 
 
 class ModeratorSerializer(serializers.HyperlinkedModelSerializer):
@@ -61,9 +64,19 @@ class ModeratorSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CreatorSerializer(serializers.HyperlinkedModelSerializer):
+    id = MyUserSerializer(required=True)
     class Meta:
         model = Creator
-        fields = ['id', 'info', 'is validated', 'payment details']
+        fields = ['id']
+
+    def create(self, validated_data):
+        my_user_data = validated_data.pop('id')
+        id = MyUserSerializer.create(MyUserSerializer(), validated_data=my_user_data)
+        creator, created = Creator.objects.update_or_create(id=id,
+                                                            info=" ",
+                                                            is_validated=False,
+                                                            payment_details=" ")
+        return creator
 
 
 class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):

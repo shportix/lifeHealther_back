@@ -196,12 +196,14 @@ def api_delete_my_user_view(request, my_user_id):
 @api_view(['POST', ])
 def api_create_creator_view(request):
     creator = Creator()
-
     if request.method == "POST":
         serializer = CreatorSerializer(creator, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            creator = serializer.create(validated_data=request.data)
+            data = {
+                "id": creator.id_id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -256,12 +258,14 @@ def api_delete_creator_view(request, creator_id):
 @api_view(['POST', ])
 def api_create_customer_view(request):
     customer = Customer()
-
     if request.method == "POST":
         serializer = CustomerSerializer(customer, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            customer = serializer.create(validated_data=request.data)
+            data = {
+                "id": customer.id_id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
