@@ -48,7 +48,7 @@ def api_create_test_mongo_view(request):
         "medicine_id": 1,
         "common_name": "Paracetamol",
         "scientific_name": "",
-        "available": "Y",
+        "available": ["Y", "p"],
         "category": "fever"
     }
     medicine_2 = {
