@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
+import pymongo
+import gridfs
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +32,11 @@ DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ["*"]
 
+mongodb_client = pymongo.MongoClient(
+    'mongodb+srv://lifehealther:DmdIHgLhwpJDJ6Sg@lifehealthermongodb.vtllcje.mongodb.net/'
+)
+mongodb_name = mongodb_client['lifehealthermongodb']
+fs = gridfs.GridFS(mongodb_name)
 
 # Application definition
 

@@ -38,9 +38,18 @@ class MyUserSerializer(serializers.HyperlinkedModelSerializer):
 #
 
 class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
+    id = MyUserSerializer(required=True)
     class Meta:
         model = Administrator
         fields = ['id', 'firstName', 'lastName']
+
+    def create(self, validated_data):
+        my_user_data = validated_data.pop('id')
+        id = MyUserSerializer.create(MyUserSerializer(), validated_data=my_user_data)
+        admin, created = Administrator.objects.update_or_create(id=id,
+                                                                firstName=validated_data.pop('firstName'),
+                                                                lastName=validated_data.pop('lastName'))
+        return admin
 
 
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
@@ -58,9 +67,18 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ModeratorSerializer(serializers.HyperlinkedModelSerializer):
+    id = UserSerializer(required=True)
     class Meta:
         model = Moderator
         fields = ['id', 'firstName', 'lastName']
+
+    def create(self, validated_data):
+        my_user_data = validated_data.pop('id')
+        id = MyUserSerializer.create(MyUserSerializer(), validated_data=my_user_data)
+        moder, created = Moderator.objects.update_or_create(id=id,
+                                                                firstName=validated_data.pop('firstName'),
+                                                                lastName=validated_data.pop('lastName'))
+        return moder
 
 
 class CreatorSerializer(serializers.HyperlinkedModelSerializer):
@@ -80,27 +98,82 @@ class CreatorSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
+    creator = serializers.RelatedField(read_only=True)
     class Meta:
         model = Subscription
         fields = ['id', 'creator', 'customer']
 
 
 class SponsorTierSerializer(serializers.HyperlinkedModelSerializer):
+    creator = serializers.RelatedField(read_only=True)
     class Meta:
         model = SponsorTier
         fields = ['id', 'creator', 'price', 'name']
 
+    def create(self, validated_data):
+        creator = Creator.objects.get(id=int(validated_data.pop('creator')))
+        sponsor_tier, created = SponsorTier.objects.update_or_create(creator=creator,
+                                                            price=validated_data.pop('price'),
+                                                            name=validated_data.pop("name"))
+        return sponsor_tier
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "creator": instance.creator.id_id,
+            "price": instance.price,
+            "name": instance.name
+        }
+        return representation
+
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
+    creator = serializers.RelatedField(read_only=True)
     class Meta:
         model = Content
-        fields = ['id', 'creator', 'content type', 'like count', 'is paid']
+        fields = ['id', 'creator', 'content_type', 'like_count', 'is_paid']
+
+    def create(self, validated_data):
+        creator = Creator.objects.get(id=int(validated_data.pop('creator')))
+        content, created = Content.objects.update_or_create(creator=creator,
+                                                            content_type=validated_data.pop('content_type'),
+                                                            like_count=validated_data.pop("like_count"),
+                                                            is_paid=validated_data.pop('is_paid'))
+        return content
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "creator": instance.creator.id_id,
+            "content_type": instance.content_type,
+            "like_count": instance.like_count,
+            "is_paid": instance.is_paid
+        }
+        return representation
 
 
 class ContentLikeSerializer(serializers.HyperlinkedModelSerializer):
+    customer = serializers.RelatedField(read_only=True)
+    content = serializers.RelatedField(read_only=True)
+
     class Meta:
         model = ContentLike
         fields = ['id', 'customer', 'content']
+
+    def create(self, validated_data):
+        customer = Customer.objects.get(id=int(validated_data.pop('customer')))
+        content = Content.objects.get(id=int(validated_data.pop('content')))
+        like, created = Content.objects.update_or_create(customer=customer,
+                                                            content=content)
+        return like
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "customer": instance.customer.id_id,
+            "content": instance.content.id,
+        }
+        return representation
 
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
@@ -118,13 +191,30 @@ class CommentLikeSerializer(serializers.HyperlinkedModelSerializer):
 class SponsorSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = SponsorSubscription
-        fields = ['id', 'customer', 'sponsor tier']
+        fields = ['id', 'customer', 'sponsor_tier']
 
 
 class SponsorTierContentSerializer(serializers.HyperlinkedModelSerializer):
+    sponsor_tier = serializers.RelatedField(read_only=True)
+    content = serializers.RelatedField(read_only=True)
     class Meta:
         model = SponsorTierContent
-        fields = ['id', 'content', 'sponsor tier']
+        fields = ['id', 'content', 'sponsor_tier']
+
+    def create(self, validated_data):
+        sponsor_tier = SponsorTier.objects.get(id=int(validated_data.pop('sponsor_tier')))
+        content = Content.objects.get(id=int(validated_data.pop('content')))
+        tier_cont, created = Content.objects.update_or_create(sponsor_tier=sponsor_tier,
+                                                            content=content)
+        return tier_cont
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "sponsor_tier": instance.sponsor_tier.id,
+            "content": instance.content.id,
+        }
+        return representation
 
 
 class RegistrationSerializers(serializers.HyperlinkedModelSerializer):

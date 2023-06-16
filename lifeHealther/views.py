@@ -1,10 +1,19 @@
 from django.contrib.auth.models import User
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import json
 import pymongo
+import logging
+from health_care_backend.settings import mongodb_client, mongodb_name, fs
 from bson.json_util import dumps
 import requests
+from bson.binary import Binary
+from bson.objectid import ObjectId
+import base64
+from django.core import serializers
+
 from lifeHealther.models import (
     MyUser,
     Administrator,
@@ -38,32 +47,195 @@ from lifeHealther.api.serializers import (
 )
 
 
-#test mongo
 @api_view(['GET', ])
-def api_create_test_mongo_view(request):
-    client = pymongo.MongoClient('mongodb+srv://lifehealther:DmdIHgLhwpJDJ6Sg@lifehealthermongodb.vtllcje.mongodb.net/')
-    dbname = client['lifehealthermongodb']
-    collection_name = dbname["medicinedetails"]
-    medicine_1 = {
-        "medicine_id": 1,
-        "common_name": "Paracetamol",
-        "scientific_name": "",
-        "available": ["Y", "p"],
-        "category": "fever"
+def api_login_view(request):
+    try:
+        user = User.objects.get(username=request.data["username"], password=requests.data["password"])
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    data = {
+        "id" : user.id
     }
-    medicine_2 = {
-        "medicine_id": "RR000342522",
-        "common_name": "Metformin",
-        "scientific_name": "",
-        "available": "Y",
-        "category": "type 2 diabetes"
-    }
-    # Insert the documents
-    collection_name.insert_many([medicine_1, medicine_2])
-    res = collection_name.find({})
-    list_res = list(res)
-    json_res = dumps(list_res)
-    return  Response(json_res, status=status.HTTP_200_OK)
+    my_user = MyUser.objects.get(id=data["id"])
+    data["role"] = my_user.role
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+def api_create_creator_mongo_view(request):
+    collection_name = mongodb_name["creator"]
+    try:
+
+        creator = {
+            "creator_id": request.data["creator_id"],
+            "avatar": "NO",
+            "keywords": [],
+            "diplomas": []
+        }
+
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(creator)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', ])
+def api_get_creator_mongo_view(request, creator_id):
+
+    collection_name = mongodb_name["creator"]
+    try:
+        creator_data = collection_name.find_one({"creator_id": creator_id})
+        creator_data = {
+            "creator_id": creator_data["creator_id"],
+            "avatar": creator_data["avatar"],
+            "keywords": creator_data["keywords"],
+            "diplomas": creator_data["diplomas"]
+        }
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=creator_data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', ])
+def api_create_diploma_mongo_view(request):
+    collection_name = mongodb_name["diploma"]
+    diploma_file = request.FILES["diploma_file"]
+    try:
+        diploma_data = diploma_file.read()
+        diploma_bson = Binary(diploma_data)
+        diploma = {
+            "is_valid": False,
+            "diploma_file": diploma_bson
+        }
+        diploma_id = collection_name.insert_one(diploma).inserted_id
+        diploma_id = str(diploma_id)
+        collection_name =  mongodb_name["creator"]
+        creator_data = collection_name.find_one({"creator_id": request.data["creator_id"]})
+        diplomas = creator_data["diplomas"].append(diploma_id)
+        collection_name.update_one({"creator_id": request.data["creator_id"]}, {'$set': {'diplomas': diplomas}})
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', ])
+def api_get_diplomas_mongo_view(request, creator_id):
+
+    collection_diploma = mongodb_name["diploma"]
+    collection_creator = mongodb_name["creator"]
+    try:
+        creator_data = collection_creator.find_one({"creator_id": creator_id})
+        diplomas_ids = creator_data["diplomas"]
+        diplomas = {}
+        k = 0
+        for i in diplomas_ids:
+            diploma_data = collection_diploma.find_one({'_id': ObjectId(i)})
+            diplomas[k] = diploma_data["diploma_file"]
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=diplomas, status=status.HTTP_200_OK)
+
+
+#test mongo
+@api_view(['POST', ])
+def api_create_article_mongo_view(request):
+
+    collection_name = mongodb_name["articles"]
+    keywords = request.data["keywords"].split(",")
+    keywords = [i.strip() for i in keywords]
+    try:
+        article = {
+            "content_id": request.data["content_id"],
+            "article_name": request.data["article_name"],
+            "text": request.data["text"],
+            "keywords": keywords,
+        }
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(article)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST', ])
+def api_create_video_mongo_view(request):
+    logging.basicConfig(level=logging.DEBUG)
+    collection_name = mongodb_name["videos"]
+    logging.debug(f"data = {request.POST}")
+    logging.debug(f"files = {request.FILES}")
+    video_file = request.FILES["video"]
+    preview_file = request.FILES["preview"]
+    keywords = request.data.get("keywords").split(",")
+    keywords = [i.strip() for i in keywords]
+    try:
+        video_file_id = fs.put(video_file)
+        preview_data = preview_file.read()
+        preview_bson = Binary(preview_data)
+        video = {
+            "content_id": request.data["content_id"],
+            "video_name": request.data["video_name"],
+            "video_file_id": video_file_id,
+            "preview": preview_bson,
+            "keywords": keywords,
+        }
+
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(video)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', ])
+def api_get_video_info_mongo_view(request, content_id):
+    logging.basicConfig(level=logging.DEBUG)
+
+    collection_name = mongodb_name["videos"]
+    try:
+        video_data = collection_name.find_one({"content_id": content_id})
+        preview_bytes = video_data['preview']
+        # logging.debug(preview_bytes)
+
+            # Перетворення фото у формат Base64
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        video_data = {
+            "content_id": video_data["content_id"],
+            "video_name": video_data["video_name"],
+            "preview": encoded_preview,
+            "keywords": video_data["keywords"],
+        }
+    except Exception:
+         return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=video_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+def api_get_video_mongo_view(request, content_id):
+
+    collection_name = mongodb_name["videos"]
+    try:
+        video_data = collection_name.find_one({"content_id": content_id})
+        video_file = fs.get(video_data["video_file_id"])
+        # mime_type = magic.from_buffer(video_file.read(), mime=True)
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    response = FileResponse(video_file)
+    return  Response(response)
+
+
+@api_view(['GET', ])
+def api_get_article_mongo_view(request, content_id):
+
+    collection_name = mongodb_name["articles"]
+    try:
+        article_data = collection_name.find_one({"content_id": content_id})
+        article_data = {
+            "content_id": article_data["content_id"],
+            "article_name": article_data["article_name"],
+            "text": article_data["text"],
+            "keywords": article_data["keywords"],
+        }
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=article_data, status=status.HTTP_200_OK)
 
 
 # //////user//////
@@ -71,12 +243,11 @@ def api_create_test_mongo_view(request):
 def api_create_user_view(request):
     user = User()
 
-    if request.method == "POST":
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(user, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])
@@ -86,9 +257,8 @@ def api_get_user_view(request, user_id):
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == "GET":
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
 
 
 @api_view(['PUT', ])
@@ -443,9 +613,16 @@ def api_create_content_view(request):
 
     if request.method == "POST":
         serializer = ContentSerializer(content, data=request.data)
+        creator = Creator.objects.get(id=request.data["creator"])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            content = Content.objects.create(creator=creator,
+                                             content_type=request.data['content_type'],
+                                             like_count=request.data["like_count"],
+                                             is_paid=request.data['is_paid'])
+            data = {
+                "id": content.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -459,6 +636,36 @@ def api_get_content_view(request, content_id):
     if request.method == "GET":
         serializer = ContentSerializer(content)
         return Response(serializer.data)
+
+
+@api_view(['GET', ])
+def api_get_free_articles_content_view(request):
+    try:
+        articles = Content.objects.filter(content_type="article", is_paid=False)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in articles:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
+def api_get_free_videos_content_view(request):
+    try:
+        video = Content.objects.filter(content_type="video", is_paid=False)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in video:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
 
 
 @api_view(['PUT', ])
@@ -683,9 +890,15 @@ def api_create_sponsor_tier_view(request):
 
     if request.method == "POST":
         serializer = SponsorTierSerializer(sponsor_tier, data=request.data)
+        creator = Creator.objects.get(id=request.data["creator"])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            sponsor_tier = SponsorTier.objects.create(creator=creator,
+                                                      price=request.data['price'],
+                                                      name=request.data['name'])
+            data = {
+                "id": sponsor_tier.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
