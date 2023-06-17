@@ -252,6 +252,23 @@ def api_create_article_mongo_view(request):
 
 
 @api_view(['POST', ])
+def api_create_creator_mongo_view(request):
+
+    collection_name = mongodb_name["creator_info"]
+    try:
+        creator = {
+            "creator_id": request.data["id"],
+            "avatar": "no",
+            "diplomas": [],
+            "keywords": [],
+        }
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(creator)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST', ])
 def api_create_video_mongo_view(request):
     logging.basicConfig(level=logging.DEBUG)
     collection_name = mongodb_name["videos"]
@@ -328,6 +345,28 @@ def api_get_video_info_mongo_view(request, content_id):
     except Exception:
          return Response(status=status.HTTP_404_NOT_FOUND)
     return  Response(data=video_data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', ])
+def api_update_video_mongo_view(request, content_id):
+    logging.basicConfig(level=logging.DEBUG)
+
+    collection_name = mongodb_name["videos"]
+    try:
+        keywords = request.data.get("keywords").split(",")
+        keywords = [i.strip() for i in keywords]
+        query = {"content_id": content_id}
+        update = {'$set': {
+            "video_name": request.data["video_name"],
+            "keywords": keywords
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+         return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(status=status.HTTP_201_CREATED)
+
 
 
 @api_view(['GET', ])
