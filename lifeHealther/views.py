@@ -654,6 +654,38 @@ def api_get_free_articles_content_view(request):
 
 
 @api_view(['GET', ])
+def api_get_creators_articles_content_view(request, creator_id):
+    try:
+        creator = Creator.objects.get(id=creator_id)
+        articles = Content.objects.filter(content_type="article", creator=creator)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in articles:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
+def api_get_creators_videos_content_view(request, creator_id):
+    try:
+        creator = Creator.objects.get(id=creator_id)
+        video = Content.objects.filter(content_type="video", creator=creator)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in video:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
 def api_get_free_videos_content_view(request):
     try:
         video = Content.objects.filter(content_type="video", is_paid=False)
