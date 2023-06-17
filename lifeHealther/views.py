@@ -255,8 +255,36 @@ def api_create_article_mongo_view(request):
 def api_create_video_mongo_view(request):
     logging.basicConfig(level=logging.DEBUG)
     collection_name = mongodb_name["videos"]
-    logging.debug(f"data = {request.POST}")
-    logging.debug(f"files = {request.FILES}")
+    # logging.debug(f"data = {request.POST}")
+    # logging.debug(f"files = {request.FILES}")
+    video_file = request.FILES["video"]
+    preview_file = request.FILES["preview"]
+    keywords = request.data.get("keywords").split(",")
+    keywords = [i.strip() for i in keywords]
+    try:
+        video_file_id = fs.put(video_file)
+        preview_data = preview_file.read()
+        preview_bson = Binary(preview_data)
+        video = {
+            "content_id": request.data["content_id"],
+            "video_name": request.data["video_name"],
+            "video_file_id": video_file_id,
+            "preview": preview_bson,
+            "keywords": keywords,
+        }
+
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(video)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST', ])
+def api_create_shorts_mongo_view(request):
+    logging.basicConfig(level=logging.DEBUG)
+    collection_name = mongodb_name["shorts"]
+    # logging.debug(f"data = {request.POST}")
+    # logging.debug(f"files = {request.FILES}")
     video_file = request.FILES["video"]
     preview_file = request.FILES["preview"]
     keywords = request.data.get("keywords").split(",")
