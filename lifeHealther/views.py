@@ -217,8 +217,8 @@ def api_get_video_mongo_view(request, content_id):
         # mime_type = magic.from_buffer(video_file.read(), mime=True)
     except Exception:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    response = FileResponse(video_file)
-    return  Response(response)
+
+    return  FileResponse(video_file)
 
 
 @api_view(['GET', ])
