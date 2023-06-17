@@ -234,6 +234,7 @@ def api_get_creator_diplomas_mongo_view(request, creator_id):
                 "file": encoded_preview,
                 "id": i
             }
+            k += 1
     except Exception:
         return Response(status=status.HTTP_404_NOT_FOUND)
     return  Response(data=diplomas, status=status.HTTP_200_OK)
