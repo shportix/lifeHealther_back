@@ -204,7 +204,7 @@ def api_create_diploma_mongo_view(request):
         }
         diploma_id = collection_name.insert_one(diploma).inserted_id
         diploma_id = str(diploma_id)
-        collection_name =  mongodb_name["creator"]
+        collection_name =  mongodb_name["creator_info"]
         creator_data = collection_name.find_one({"creator_id": request.data["creator_id"]})
         diplomas = creator_data["diplomas"].append(diploma_id)
         collection_name.update_one({"creator_id": request.data["creator_id"]}, {'$set': {'diplomas': diplomas}})
