@@ -368,6 +368,26 @@ def api_update_video_mongo_view(request, content_id):
     return  Response(status=status.HTTP_201_CREATED)
 
 
+@api_view(['PUT', ])
+def api_update_article_mongo_view(request, content_id):
+    logging.basicConfig(level=logging.DEBUG)
+
+    collection_name = mongodb_name["articles"]
+    try:
+        keywords = request.data.get("keywords").split(",")
+        keywords = [i.strip() for i in keywords]
+        query = {"content_id": content_id}
+        update = {'$set': {
+            "article_name": request.data["article_name"],
+            "keywords": keywords
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+         return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(status=status.HTTP_201_CREATED)
+
 
 @api_view(['GET', ])
 def api_get_video_mongo_view(request, content_id):
