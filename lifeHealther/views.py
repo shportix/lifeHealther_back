@@ -239,6 +239,26 @@ def api_get_creator_diplomas_mongo_view(request, creator_id):
     return  Response(data=diplomas, status=status.HTTP_200_OK)
 
 
+@api_view(['GET', ])
+def api_get_diploma_mongo_view(request, diploma_id):
+
+    collection_diploma = mongodb_name["diploma"]
+    try:
+        diploma_data = collection_diploma.find_one({'_id': ObjectId(diploma_id)})
+        preview_bytes = diploma_data["diploma_file"]
+        # logging.debug(preview_bytes)
+
+        # Перетворення фото у формат Base64
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        diplomas = {
+            "file": encoded_preview,
+            "id": diploma_id
+        }
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=diplomas, status=status.HTTP_200_OK)
+
+
 #test mongo
 @api_view(['POST', ])
 def api_create_article_mongo_view(request):
