@@ -217,7 +217,7 @@ def api_create_diploma_mongo_view(request):
 def api_get_creator_diplomas_mongo_view(request, creator_id):
 
     collection_diploma = mongodb_name["diploma"]
-    collection_creator = mongodb_name["creator"]
+    collection_creator = mongodb_name["creator_info"]
     try:
         creator_data = collection_creator.find_one({"creator_id": creator_id})
         diplomas_ids = creator_data["diplomas"]
