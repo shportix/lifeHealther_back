@@ -79,6 +79,42 @@ def api_find_article_view(request, keyword):
 
 
 @api_view(['GET', ])
+def api_find_video_info_view(request, keyword):
+    collection_name = mongodb_name["videos"]
+        # Елемент для пошуку
+    search_element = keyword
+
+        # Складання запиту
+    query = {
+        'keywords': {
+            '$elemMatch': {
+                '$eq': search_element
+             }
+        }
+    }
+
+        # Виконання запиту та отримання документів
+    videos = collection_name.find(query)
+    data = {}
+    k = 0
+    for i in videos:
+        content = Content.objects.get(id=int(i["content_id"]))
+        preview_bytes = i['preview']
+        # logging.debug(preview_bytes)
+
+        # Перетворення фото у формат Base64
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        data[k] = {
+            "creator": content.creator.id_id,
+            "content_id": i["content_id"],
+            "video_name": i["video_name"],
+            "preview": encoded_preview
+        }
+        k += 1
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
 def api_login_view(request):
     try:
         user = User.objects.get(username=request.data["username"], password=requests.data["password"])
