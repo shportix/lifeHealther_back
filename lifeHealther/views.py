@@ -214,7 +214,7 @@ def api_create_diploma_mongo_view(request):
 
 
 @api_view(['GET', ])
-def api_get_diplomas_mongo_view(request, creator_id):
+def api_get_creator_diplomas_mongo_view(request, creator_id):
 
     collection_diploma = mongodb_name["diploma"]
     collection_creator = mongodb_name["creator"]
@@ -225,7 +225,15 @@ def api_get_diplomas_mongo_view(request, creator_id):
         k = 0
         for i in diplomas_ids:
             diploma_data = collection_diploma.find_one({'_id': ObjectId(i)})
-            diplomas[k] = diploma_data["diploma_file"]
+            preview_bytes = diploma_data["diploma_file"]
+            # logging.debug(preview_bytes)
+
+            # Перетворення фото у формат Base64
+            encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+            diplomas[k] = {
+                "file": encoded_preview,
+                "id": i
+            }
     except Exception:
         return Response(status=status.HTTP_404_NOT_FOUND)
     return  Response(data=diplomas, status=status.HTTP_200_OK)
