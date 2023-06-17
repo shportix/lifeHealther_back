@@ -48,6 +48,37 @@ from lifeHealther.api.serializers import (
 
 
 @api_view(['GET', ])
+def api_find_article_view(request, keyword):
+    collection_name = mongodb_name["articles"]
+        # Елемент для пошуку
+    search_element = keyword
+
+        # Складання запиту
+    query = {
+        'keywords': {
+            '$elemMatch': {
+                '$eq': search_element
+             }
+        }
+    }
+
+        # Виконання запиту та отримання документів
+    articles = collection_name.find(query)
+    data = {}
+    k = 0
+    for i in articles:
+        content = Content.objects.get(id=i["content_id"])
+        data[k] = {
+            "creator": content.creator.id_id,
+            "content_id": i["content_id"],
+            "article_name": i["article_name"],
+            "text": i["text"]
+        }
+        k += 1
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
 def api_login_view(request):
     try:
         user = User.objects.get(username=request.data["username"], password=requests.data["password"])
