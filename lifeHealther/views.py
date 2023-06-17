@@ -76,6 +76,19 @@ def api_delete_video_view(request, content_id):
     return Response(data=data)
 
 
+@api_view(['DELETE', ])
+def api_delete_article_view(request, content_id):
+    collection_name = mongodb_name["articles"]
+    try:
+        atricle = collection_name.delete_one({"content_id": content_id})
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    data = {
+        "success": "delete successful"
+    }
+    return Response(data=data)
+
+
 @api_view(['POST', ])
 def api_create_creator_mongo_view(request):
     collection_name = mongodb_name["creator"]

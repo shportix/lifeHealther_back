@@ -73,7 +73,8 @@ from lifeHealther.views import (
     api_get_creators_articles_content_view,
     api_get_creators_videos_content_view,
     api_get_video_mongo_view,
-    api_delete_video_view
+    api_delete_video_view,
+    api_delete_article_view
 )
 
 urlpatterns = [
@@ -146,7 +147,8 @@ urlpatterns = [
     path("article/creator/<int:creator_id>", api_get_creators_articles_content_view),
     path("video/creator/<int:creator_id>", api_get_creators_videos_content_view),
     path('video/<str:content_id>', api_get_video_mongo_view),
-    path("video/delete/<str:content_id>", api_delete_video_view)
+    path("video/delete/<str:content_id>", api_delete_video_view),
+    path('article/delete/<int:content_id>', api_delete_article_view)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
