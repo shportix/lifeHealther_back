@@ -602,6 +602,20 @@ def api_get_creator_view(request, creator_id):
         return Response(serializer.data)
 
 
+@api_view(['GET', ])
+def api_get_creator_info_view(request, creator_id):
+    try:
+        creator = Creator.objects.get(id=creator_id)
+    except Creator.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        data = {
+            "info": creator.info
+        }
+        return Response(data)
+
+
 @api_view(['PUT', ])
 def api_update_creator_view(request, creator_id):
     try:
