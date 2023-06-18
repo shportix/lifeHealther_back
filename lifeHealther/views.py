@@ -1006,6 +1006,19 @@ def api_get_free_articles_content_view(request):
 
 
 @api_view(['GET', ])
+def api_get_customer_subs_view(request, customer_id):
+    customer = Customer.objects.get(id=customer_id)
+    customer_subs = Subscription.objects.filter(customer=customer)
+    creators = []
+    for i in customer_subs:
+        creators.append(i.creator.id_id)
+    data = {
+        "creators": creators
+    }
+    return Response(data)
+
+
+@api_view(['GET', ])
 def api_get_creators_articles_content_view(request, creator_id):
     try:
         creator = Creator.objects.get(id=creator_id)
