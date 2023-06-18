@@ -193,24 +193,31 @@ def api_get_creator_mongo_view(request, creator_id):
 
 @api_view(['POST', ])
 def api_create_diploma_mongo_view(request):
+    logging.basicConfig(level=logging.DEBUG)
     collection_name = mongodb_name["diploma"]
+    collection_creator = mongodb_name["creator_info"]
     diploma_file = request.FILES["diploma_file"]
-    try:
-        diploma_data = diploma_file.read()
-        diploma_bson = Binary(diploma_data)
-        diploma = {
-            "is_valid": False,
-            "diploma_file": diploma_bson
-        }
-        diploma_id = collection_name.insert_one(diploma).inserted_id
-        diploma_id = str(diploma_id)
-        collection_name =  mongodb_name["creator_info"]
-        creator_data = collection_name.find_one({"creator_id": request.data["creator_id"]})
-        diplomas = creator_data["diplomas"]
-        diplomas += [diploma_id]
-        collection_name.update_one({"creator_id": request.data["creator_id"]}, {'$set': {'diplomas': diplomas}})
-    except Exception:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    # try:
+    diploma_data = diploma_file.read()
+    diploma_bson = Binary(diploma_data)
+    diploma = {
+        "is_valid": False,
+        "diploma_file": diploma_bson
+    }
+    diploma_id = collection_name.insert_one(diploma).inserted_id
+    diploma_id = str(diploma_id)
+    logging.debug("aaaaaaaaaaa")
+    logging.debug(request.data["creator_id"])
+    creator_data = collection_creator.find_one({"creator_id": int(request.data["creator_id"])})
+    logging.debug(creator_data)
+    diplomas = creator_data["diplomas"]
+    new_diplomas = []
+    for i in diplomas:
+        new_diplomas.append(i)
+    new_diplomas.append(diploma_id)
+    collection_creator.update_one({"creator_id": int(request.data["creator_id"])}, {'$set': {'diplomas': new_diplomas}})
+    # except Exception:
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)
     return  Response(status=status.HTTP_201_CREATED)
 
 
