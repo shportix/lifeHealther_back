@@ -306,22 +306,6 @@ def api_create_article_mongo_view(request):
     return  Response(status=status.HTTP_201_CREATED)
 
 
-@api_view(['PUT', ])
-def api_update_creator_avatar_mongo_view(request):
-
-    collection_name = mongodb_name["creator_info"]
-    try:
-        creator = {
-            "creator_id": request.data["id"],
-            "avatar": "no",
-            "diplomas": []
-        }
-    except Exception:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    collection_name.insert_one(creator)
-    return  Response(status=status.HTTP_201_CREATED)
-
-
 @api_view(['POST', ])
 def api_create_video_mongo_view(request):
     logging.basicConfig(level=logging.DEBUG)
