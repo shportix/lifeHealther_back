@@ -173,6 +173,26 @@ def api_create_creator_mongo_view(request):
     return  Response(status=status.HTTP_201_CREATED)
 
 
+@api_view(['PUT', ])
+def api_update_creator_avatar_mongo_view(request, creator_id):
+    collection_name = mongodb_name["creator_info"]
+    try:
+        avatar_file = request.FILES["avatar"]
+        avatar_data = avatar_file.read()
+        avatar_bson = Binary(avatar_data)
+
+        query = {"creator_id": creator_id}
+        update = {'$set': {
+            "avatar": avatar_bson
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
 @api_view(['GET', ])
 def api_get_creator_mongo_view(request, creator_id):
 
@@ -415,7 +435,6 @@ def api_update_article_mongo_view(request, content_id):
             "article_name": request.data["article_name"],
             "keywords": keywords
         }}
-
         # Оновлення одного документа, який задовільняє умову
         result = collection_name.update_one(query, update)
     except Exception:
