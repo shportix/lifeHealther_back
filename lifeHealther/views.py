@@ -176,6 +176,21 @@ def api_create_creator_mongo_view(request):
     collection_name.insert_one(creator)
     return  Response(status=status.HTTP_201_CREATED)
 
+@api_view(['POST', ])
+def api_create_customer_mongo_view(request):
+    collection_name = mongodb_name["customer_info"]
+    try:
+
+        creator = {
+            "customer_id": request.data["creator_id"],
+            "keywords": {}
+        }
+
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(creator)
+    return  Response(status=status.HTTP_201_CREATED)
+
 
 @api_view(['PUT', ])
 def api_update_creator_avatar_mongo_view(request, creator_id):
