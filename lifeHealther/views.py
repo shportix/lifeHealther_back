@@ -48,6 +48,24 @@ from lifeHealther.api.serializers import (
 
 
 @api_view(['GET', ])
+def api_login_view(request):
+    username = request.data["username"]
+    password = requests.data["password"]
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response(data={"error":"user not found"}, status=status.HTTP_404_NOT_FOUND)
+    if user.password != password:
+        return Response(data={"error": "password incorrect"}, status=status.HTTP_404_NOT_FOUND)
+    my_user = MyUser.objects.get(id_id=user.id)
+    data = {
+        "id": user.id,
+        "role": my_user.role
+    }
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
 def api_find_article_view(request, keyword):
     collection_name = mongodb_name["articles"]
         # Елемент для пошуку

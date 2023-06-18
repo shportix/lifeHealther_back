@@ -85,7 +85,8 @@ from lifeHealther.views import (
     api_get_diploma_mongo_view,
     api_get_creator_info_view,
     api_get_creator_mongo_view,
-    api_update_creator_avatar_mongo_view
+    api_update_creator_avatar_mongo_view,
+    api_login_view
 )
 
 urlpatterns = [
@@ -170,7 +171,8 @@ urlpatterns = [
     path('diploma/<str:diploma_id>', api_get_diploma_mongo_view),
     path('creator/info/<int:creator_id>', api_get_creator_info_view),
     path('creator/mongo/<int:creator_id>', api_get_creator_mongo_view),
-    path('creator/update/avatar/<int:creator_id>', api_update_creator_avatar_mongo_view)
+    path('creator/update/avatar/<int:creator_id>', api_update_creator_avatar_mongo_view),
+    path('login', api_login_view)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
