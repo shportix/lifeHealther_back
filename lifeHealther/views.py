@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
 import pymongo
+from django.db.models import Q
 import logging
 from health_care_backend.settings import mongodb_client, mongodb_name, fs
 from bson.json_util import dumps
@@ -183,7 +184,8 @@ def api_create_customer_mongo_view(request):
 
         creator = {
             "customer_id": request.data["creator_id"],
-            "keywords": {}
+            "keywords": {},
+            "viewed": []
         }
 
     except Exception:
@@ -225,6 +227,22 @@ def api_get_creator_mongo_view(request, creator_id):
         "creator_id": creator_data["creator_id"],
         "avatar": avatar,
         "diplomas": creator_data["diplomas"]
+    }
+    # except Exception:
+    #     return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=creator_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+def api_get_customer_mongo_view(request, customer_id):
+
+    collection_name = mongodb_name["customer_info"]
+    # try:
+    creator_data = collection_name.find_one({"customer_id": int(customer_id)})
+    creator_data = {
+        "customer_id": creator_data["customer_id"],
+        "keywords": creator_data["keywords"],
+        "viewed": creator_data["viewed"]
     }
     # except Exception:
     #     return Response(status=status.HTTP_404_NOT_FOUND)
@@ -884,6 +902,92 @@ def api_get_content_view(request, content_id):
     if request.method == "GET":
         serializer = ContentSerializer(content)
         return Response(serializer.data)
+
+
+@api_view(['GET', ])
+def api_get_customer_articles_content_view(request, customer_id):
+    collection_name = mongodb_name["customer_info"]
+    collection_content = mongodb_name["articles"]
+    customer_mongo = collection_name.find_one({"customer_id": int(customer_id)})
+    customer_sql = Customer.objects.get(id=customer_id)
+    viewed = customer_mongo["viewed"]
+    customer_sponsor_sub = SponsorSubscription.objects.filter(customer=customer_sql)
+    customer_sponsor_tiers = []
+    for sub in customer_sponsor_sub:
+        customer_sponsor_tiers.append(sub.sponsor_tier)
+    customer_sponsor_tier_contents = SponsorTierContent.objects.filter(sponsor_tier__in=customer_sponsor_tiers)
+    customer_sponsor_contents = []
+    for sponsor_tier_content in customer_sponsor_tier_contents:
+        content = sponsor_tier_content.content
+        if content.content_type == "article" and content.id not in viewed:
+            customer_sponsor_contents.append(content.id)
+    free_content = Content.objects.filter(content_type="article", is_paid=False)
+    customer_free_content = []
+    for content in free_content:
+        if content.id not in viewed:
+            customer_free_content.append(content.id)
+    if customer_mongo["keywords"] != {}:
+        customer_keywords = customer_mongo["keywords"]
+        customer_sponsor_contents_rate = []
+        for i in customer_sponsor_contents:
+            content = [i]
+            content_mongo = collection_content.find_one({"content_id": i})
+            content_keywords = content_mongo["keywords"]
+            rate = 0
+            for word in content_keywords:
+                if word in customer_keywords.keys():
+                    rate += customer_keywords["word"]
+            content.append(rate)
+            content_sql = Content.objects.get(id=i)
+            content.append(content_sql.like_count)
+            customer_sponsor_contents_rate.append(content)
+        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1], x[2]))
+        customer_sponsor_contents = []
+        for i in customer_sponsor_contents_rate:
+            customer_sponsor_contents.append(i[0])
+        customer_free_contents_rate = []
+        for i in customer_free_content:
+            content = [i]
+            content_mongo = collection_content.find_one({"content_id": i})
+            content_keywords = content_mongo["keywords"]
+            rate = 0
+            for word in content_keywords:
+                if word in customer_keywords.keys():
+                    rate += customer_keywords["word"]
+            content.append(rate)
+            content_sql = Content.objects.get(id=i)
+            content.append(content_sql.like_count)
+            customer_free_contents_rate.append(content)
+        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1], x[2]))
+        customer_free_content = []
+        for i in customer_free_contents_rate:
+            customer_free_content.append(i[0])
+    else:
+        customer_sponsor_contents_rate = []
+        for i in customer_sponsor_contents:
+            content = [i]
+            content_sql = Content.objects.get(id=i)
+            content.append(content_sql.like_count)
+            customer_sponsor_contents_rate.append(content)
+        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1]))
+        customer_sponsor_contents = []
+        for i in customer_sponsor_contents_rate:
+            customer_sponsor_contents.append(i[0])
+        customer_free_contents_rate = []
+        for i in customer_free_content:
+            content = [i]
+            content_sql = Content.objects.get(id=i)
+            content.append(content_sql.like_count)
+            customer_free_contents_rate.append(content)
+        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1]))
+        customer_free_content = []
+        for i in customer_free_contents_rate:
+            customer_free_content.append(i[0])
+    customer_content = customer_sponsor_contents + customer_free_content
+    data = {
+        "contents": customer_content
+    }
+    return Response(data)
 
 
 @api_view(['GET', ])
