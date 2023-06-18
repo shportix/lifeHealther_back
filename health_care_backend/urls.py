@@ -164,7 +164,7 @@ urlpatterns = [
     path('article/update/<int:content_id>', api_update_article_mongo_view),
     path('diploma/creator/get/<int:creator_id>', api_get_creator_diplomas_mongo_view),
     path('diploma/create', api_create_diploma_mongo_view),
-    path('diploma/<str:diploma_id>', api_get_diploma_mongo_view)
+    path('diploma/<str:diploma_id>', api_get_diploma_mongo_view),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

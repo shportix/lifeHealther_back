@@ -164,7 +164,6 @@ def api_create_creator_mongo_view(request):
         creator = {
             "creator_id": request.data["creator_id"],
             "avatar": "NO",
-            "keywords": [],
             "diplomas": []
         }
 
@@ -183,7 +182,6 @@ def api_get_creator_mongo_view(request, creator_id):
         creator_data = {
             "creator_id": creator_data["creator_id"],
             "avatar": creator_data["avatar"],
-            "keywords": creator_data["keywords"],
             "diplomas": creator_data["diplomas"]
         }
     except Exception:
@@ -206,10 +204,7 @@ def api_create_diploma_mongo_view(request):
     }
     diploma_id = collection_name.insert_one(diploma).inserted_id
     diploma_id = str(diploma_id)
-    logging.debug("aaaaaaaaaaa")
-    logging.debug(request.data["creator_id"])
     creator_data = collection_creator.find_one({"creator_id": int(request.data["creator_id"])})
-    logging.debug(creator_data)
     diplomas = creator_data["diplomas"]
     new_diplomas = []
     for i in diplomas:
@@ -288,16 +283,15 @@ def api_create_article_mongo_view(request):
     return  Response(status=status.HTTP_201_CREATED)
 
 
-@api_view(['POST', ])
-def api_create_creator_mongo_view(request):
+@api_view(['PUT', ])
+def api_update_creator_avatar_mongo_view(request):
 
     collection_name = mongodb_name["creator_info"]
     try:
         creator = {
             "creator_id": request.data["id"],
             "avatar": "no",
-            "diplomas": [],
-            "keywords": [],
+            "diplomas": []
         }
     except Exception:
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -616,14 +610,10 @@ def api_update_creator_view(request, creator_id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "PUT":
-        serializer = CreatorSerializer(creator, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            data = {
-                "success": "update successful"
-            }
-            return Response(data=data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        info = request.data["info"]
+        creator.info = info
+        creator.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 @api_view(['DELETE', ])
