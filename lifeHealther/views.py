@@ -158,7 +158,7 @@ def api_delete_article_view(request, content_id):
 
 @api_view(['POST', ])
 def api_create_creator_mongo_view(request):
-    collection_name = mongodb_name["creator"]
+    collection_name = mongodb_name["creator_info"]
     try:
 
         creator = {
@@ -176,16 +176,19 @@ def api_create_creator_mongo_view(request):
 @api_view(['GET', ])
 def api_get_creator_mongo_view(request, creator_id):
 
-    collection_name = mongodb_name["creator"]
-    try:
-        creator_data = collection_name.find_one({"creator_id": creator_id})
-        creator_data = {
-            "creator_id": creator_data["creator_id"],
-            "avatar": creator_data["avatar"],
-            "diplomas": creator_data["diplomas"]
-        }
-    except Exception:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    collection_name = mongodb_name["creator_info"]
+    # try:
+    creator_data = collection_name.find_one({"creator_id": int(creator_id)})
+    avatar = creator_data["avatar"]
+    if avatar != "no":
+        avatar = base64.b64encode(avatar).decode('utf-8')
+    creator_data = {
+        "creator_id": creator_data["creator_id"],
+        "avatar": avatar,
+        "diplomas": creator_data["diplomas"]
+    }
+    # except Exception:
+    #     return Response(status=status.HTTP_404_NOT_FOUND)
     return  Response(data=creator_data, status=status.HTTP_200_OK)
 
 
