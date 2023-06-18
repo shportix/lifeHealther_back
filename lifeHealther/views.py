@@ -49,8 +49,8 @@ from lifeHealther.api.serializers import (
 
 @api_view(['GET', ])
 def api_login_view(request):
-    username = request.data["username"]
-    password = requests.data["password"]
+    username = request.GET["username"]
+    password = request.GET["password"]
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
@@ -129,20 +129,6 @@ def api_find_video_info_view(request, keyword):
             "preview": encoded_preview
         }
         k += 1
-    return Response(data=data, status=status.HTTP_200_OK)
-
-
-@api_view(['GET', ])
-def api_login_view(request):
-    try:
-        user = User.objects.get(username=request.data["username"], password=requests.data["password"])
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    data = {
-        "id" : user.id
-    }
-    my_user = MyUser.objects.get(id=data["id"])
-    data["role"] = my_user.role
     return Response(data=data, status=status.HTTP_200_OK)
 
 
