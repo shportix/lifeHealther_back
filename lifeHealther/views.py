@@ -1010,8 +1010,20 @@ def api_get_customer_subs_view(request, customer_id):
     customer = Customer.objects.get(id=customer_id)
     customer_subs = Subscription.objects.filter(customer=customer)
     creators = []
+    collection_name = mongodb_name["creator_info"]
     for i in customer_subs:
-        creators.append(i.creator.id_id)
+        creator_id = i.creator.id_id
+        creator_mongo = collection_name.find_one({"creator_id": int(creator_id)})
+        user = User.objects.get(id=creator_id)
+        avatar = creator_mongo["avatar"]
+        if avatar != "NO":
+            avatar = base64.b64encode(avatar).decode('utf-8')
+        creator_data = {
+            "avatar": avatar,
+            "username": user.username
+
+        }
+        creators.append(creator_data)
     data = {
         "creators": creators
     }
