@@ -206,7 +206,8 @@ def api_create_diploma_mongo_view(request):
         diploma_id = str(diploma_id)
         collection_name =  mongodb_name["creator_info"]
         creator_data = collection_name.find_one({"creator_id": request.data["creator_id"]})
-        diplomas = creator_data["diplomas"].append(diploma_id)
+        diplomas = creator_data["diplomas"]
+        diplomas += [diploma_id]
         collection_name.update_one({"creator_id": request.data["creator_id"]}, {'$set': {'diplomas': diplomas}})
     except Exception:
         return Response(status=status.HTTP_400_BAD_REQUEST)
