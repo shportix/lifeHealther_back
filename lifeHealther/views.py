@@ -219,7 +219,7 @@ def api_get_creator_mongo_view(request, creator_id):
     # try:
     creator_data = collection_name.find_one({"creator_id": int(creator_id)})
     avatar = creator_data["avatar"]
-    if avatar != "no":
+    if avatar != "NO":
         avatar = base64.b64encode(avatar).decode('utf-8')
     creator_data = {
         "creator_id": creator_data["creator_id"],
