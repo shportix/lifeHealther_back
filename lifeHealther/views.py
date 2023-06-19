@@ -318,7 +318,7 @@ def api_create_sponsor_tier_mongo_view(request):
     collection_name = mongodb_name["sponsor_tier"]
     creator = {
         "sponsor_tier_id": request.data["sponsor_tier_id"],
-        "info": requests.data["info"]
+        "info": request.data["info"]
     }
     collection_name.insert_one(creator)
     return  Response(status=status.HTTP_201_CREATED)
