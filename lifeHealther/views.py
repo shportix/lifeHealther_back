@@ -1513,12 +1513,19 @@ def api_delete_sponsor_subscription_view(request, sponsor_subscription_id):
 @api_view(['POST', ])
 def api_create_subscription_view(request):
     subscription = Subscription()
-
+    customer_id = request.data["customer"]
+    creator_id = request.data["creator"]
+    customer = Customer.objects.get(id=customer_id)
+    creator = Creator.objects.get(id=creator_id)
     if request.method == "POST":
         serializer = SubscriptionSerializer(subscription, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            subscription = Subscription.objects.create(customer=customer,
+                                                       creator=creator)
+            data = {
+                "id": subscription.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

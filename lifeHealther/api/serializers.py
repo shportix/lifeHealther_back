@@ -99,9 +99,25 @@ class CreatorSerializer(serializers.HyperlinkedModelSerializer):
 
 class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     creator = serializers.RelatedField(read_only=True)
+    customer = serializers.RelatedField(read_only=True)
     class Meta:
         model = Subscription
         fields = ['id', 'creator', 'customer']
+
+    def create(self, validated_data):
+        customer = Customer.objects.get(id=int(validated_data.pop('customer')))
+        creator = Creator.objects.get(id=int(validated_data.pop('creator')))
+        sub, created = Content.objects.update_or_create(customer=customer,
+                                                            creator=creator)
+        return sub
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "customer": instance.customer.id_id,
+            "creator": instance.creator.id_id,
+        }
+        return representation
 
 
 class SponsorTierSerializer(serializers.HyperlinkedModelSerializer):
