@@ -1261,9 +1261,9 @@ def api_get_customer_content_view(request, content_type, customer_id):
 
             }
             final_list.append(content)
-    elif content_type == "videos":
+    elif content_type == "video":
         for cont in customer_content:
-            cont_mongo = collection_content.find_one({"content_id": cont.id})
+            cont_mongo = collection_content.find_one({"content_id": str(cont.id)})
             creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
             creator = Creator.objects.get(id=cont.creator.id_id)
             user = User.objects.get(id=creator.id_id)
@@ -1285,7 +1285,7 @@ def api_get_customer_content_view(request, content_type, customer_id):
             final_list.append(content)
     else:
         for cont in customer_content:
-            cont_mongo = collection_content.find_one({"content_id": cont.id})
+            cont_mongo = collection_content.find_one({"content_id": str(cont.id)})
             creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
             creator = Creator.objects.get(id=cont.creator.id_id)
             user = User.objects.get(id=creator.id_id)
