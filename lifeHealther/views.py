@@ -256,6 +256,20 @@ def api_delete_video_view(request, content_id):
 
 
 @api_view(['DELETE', ])
+def api_delete_sponsor_tier_view(request, sponsor_tier_id):
+    collection_name = mongodb_name["sponsor_tier"]
+    try:
+        sponsor_tier_data = collection_name.find_one({"sponsor_tier_id": sponsor_tier_id})
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    sponsor_tier = collection_name.delete_one({"sponsor_tier_id": sponsor_tier_id})
+    data = {
+        "success": "delete successful"
+    }
+    return Response(data=data)
+
+
+@api_view(['DELETE', ])
 def api_delete_short_view(request, content_id):
     collection_name = mongodb_name["shorts"]
     try:
