@@ -98,6 +98,42 @@ def api_find_article_view(request, keyword):
 
 
 @api_view(['GET', ])
+def api_find_short_info_view(request, keyword):
+    collection_name = mongodb_name["shorts"]
+        # Елемент для пошуку
+    search_element = keyword
+
+        # Складання запиту
+    query = {
+        'keywords': {
+            '$elemMatch': {
+                '$eq': search_element
+             }
+        }
+    }
+
+        # Виконання запиту та отримання документів
+    videos = collection_name.find(query)
+    data = {}
+    k = 0
+    for i in videos:
+        content = Content.objects.get(id=int(i["content_id"]))
+        preview_bytes = i['preview']
+        # logging.debug(preview_bytes)
+
+        # Перетворення фото у формат Base64
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        data[k] = {
+            "creator": content.creator.id_id,
+            "content_id": i["content_id"],
+            "video_name": i["video_name"],
+            "preview": encoded_preview
+        }
+        k += 1
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
 def api_find_video_info_view(request, keyword):
     collection_name = mongodb_name["videos"]
         # Елемент для пошуку
@@ -136,6 +172,21 @@ def api_find_video_info_view(request, keyword):
 @api_view(['DELETE', ])
 def api_delete_video_view(request, content_id):
     collection_name = mongodb_name["videos"]
+    try:
+        video_data = collection_name.find_one({"content_id": content_id})
+        fs.delete(video_data["video_file_id"])
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    video = collection_name.delete_one({"content_id": content_id})
+    data = {
+        "success": "delete successful"
+    }
+    return Response(data=data)
+
+
+@api_view(['DELETE', ])
+def api_delete_short_view(request, content_id):
+    collection_name = mongodb_name["shorts"]
     try:
         video_data = collection_name.find_one({"content_id": content_id})
         fs.delete(video_data["video_file_id"])
@@ -443,6 +494,50 @@ def api_get_video_info_mongo_view(request, content_id):
     return  Response(data=video_data, status=status.HTTP_200_OK)
 
 
+@api_view(['GET', ])
+def api_get_short_info_mongo_view(request, content_id):
+    logging.basicConfig(level=logging.DEBUG)
+
+    collection_name = mongodb_name["shorts"]
+    try:
+        video_data = collection_name.find_one({"content_id": content_id})
+        preview_bytes = video_data['preview']
+        # logging.debug(preview_bytes)
+
+            # Перетворення фото у формат Base64
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        video_data = {
+            "content_id": video_data["content_id"],
+            "video_name": video_data["video_name"],
+            "preview": encoded_preview,
+            "keywords": video_data["keywords"],
+        }
+    except Exception:
+         return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=video_data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', ])
+def api_update_short_mongo_view(request, content_id):
+    logging.basicConfig(level=logging.DEBUG)
+
+    collection_name = mongodb_name["shorts"]
+    try:
+        keywords = request.data.get("keywords").split(",")
+        keywords = [i.strip() for i in keywords]
+        query = {"content_id": content_id}
+        update = {'$set': {
+            "video_name": request.data["video_name"],
+            "keywords": keywords
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+         return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
 @api_view(['PUT', ])
 def api_update_video_mongo_view(request, content_id):
     logging.basicConfig(level=logging.DEBUG)
@@ -488,6 +583,20 @@ def api_update_article_mongo_view(request, content_id):
 def api_get_video_mongo_view(request, content_id):
 
     collection_name = mongodb_name["videos"]
+    try:
+        video_data = collection_name.find_one({"content_id": content_id})
+        video_file = fs.get(video_data["video_file_id"])
+        # mime_type = magic.from_buffer(video_file.read(), mime=True)
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    return  FileResponse(video_file)
+
+
+@api_view(['GET', ])
+def api_get_short_mongo_view(request, content_id):
+
+    collection_name = mongodb_name["shorts"]
     try:
         video_data = collection_name.find_one({"content_id": content_id})
         video_file = fs.get(video_data["video_file_id"])
@@ -1093,9 +1202,40 @@ def api_get_creators_videos_content_view(request, creator_id):
 
 
 @api_view(['GET', ])
+def api_get_creators_shorts_content_view(request, creator_id):
+    try:
+        creator = Creator.objects.get(id=creator_id)
+        video = Content.objects.filter(content_type="short", creator=creator)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in video:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
 def api_get_free_videos_content_view(request):
     try:
         video = Content.objects.filter(content_type="video", is_paid=False)
+    except Content.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in video:
+            data[k] = ContentSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
+def api_get_free_shorts_content_view(request):
+    try:
+        video = Content.objects.filter(content_type="short", is_paid=False)
     except Content.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
