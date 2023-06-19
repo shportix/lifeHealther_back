@@ -1845,6 +1845,10 @@ def api_delete_sponsor_tier_content_view(request, content_id, sponsor_tier_id):
 
     if request.method == "DELETE":
         operation = sponsor_tier_content.delete()
+        sponsor_tier_contents = SponsorTierContent.objects.filter(content=content)
+        if not sponsor_tier_contents.exists():
+            content.is_paid = False
+            content.save()
         data = {}
         if operation:
             data["success"] = "delete successful"
