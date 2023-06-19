@@ -1257,7 +1257,8 @@ def api_get_customer_content_view(request, content_type, customer_id):
                 "text": cont_mongo["text"],
                 "creator_id": creator.id_id,
                 "username": user.username,
-                "avatar": avatar
+                "avatar": avatar,
+                "like_count": cont.like_count
 
             }
             final_list.append(content)
@@ -1279,7 +1280,8 @@ def api_get_customer_content_view(request, content_type, customer_id):
                 "preview": encoded_preview,
                 "creator_id": creator.id_id,
                 "username": user.username,
-                "avatar": avatar
+                "avatar": avatar,
+                "like_count": cont.like_count
 
             }
             final_list.append(content)
@@ -1297,7 +1299,8 @@ def api_get_customer_content_view(request, content_type, customer_id):
                 "video_name": cont_mongo["video_name"],
                 "creator_id": creator.id_id,
                 "username": user.username,
-                "avatar": avatar
+                "avatar": avatar,
+                "like_count": cont.like_count
 
             }
             final_list.append(content)
