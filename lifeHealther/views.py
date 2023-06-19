@@ -926,9 +926,15 @@ def api_get_content_view(request, content_id):
 
 
 @api_view(['GET', ])
-def api_get_customer_articles_content_view(request, customer_id):
+def api_get_customer_content_view(request, customer_id):
+    content_type = requests.GET["content_type"]
     collection_name = mongodb_name["customer_info"]
-    collection_content = mongodb_name["articles"]
+    if content_type == "article":
+        collection_content = mongodb_name["articles"]
+    elif content_type == "video":
+        collection_content = mongodb_name["videos"]
+    else:
+        collection_content = mongodb_name["shorts"]
     customer_mongo = collection_name.find_one({"customer_id": int(customer_id)})
     customer_sql = Customer.objects.get(id=customer_id)
     viewed = customer_mongo["viewed"]
@@ -940,9 +946,9 @@ def api_get_customer_articles_content_view(request, customer_id):
     customer_sponsor_contents = []
     for sponsor_tier_content in customer_sponsor_tier_contents:
         content = sponsor_tier_content.content
-        if content.content_type == "article" and content.id not in viewed:
+        if content.content_type == content_type and content.id not in viewed:
             customer_sponsor_contents.append(content.id)
-    free_content = Content.objects.filter(content_type="article", is_paid=False)
+    free_content = Content.objects.filter(content_type=content_type, is_paid=False)
     customer_free_content = []
     for content in free_content:
         if content.id not in viewed:
