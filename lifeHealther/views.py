@@ -603,9 +603,6 @@ def api_get_video_info_mongo_view(request, content_id):
     try:
         video_data = collection_name.find_one({"content_id": content_id})
         preview_bytes = video_data['preview']
-        # logging.debug(preview_bytes)
-
-            # Перетворення фото у формат Base64
         encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
         video_data = {
             "content_id": video_data["content_id"],
@@ -1179,46 +1176,47 @@ def api_get_customer_content_view(request, content_type, customer_id):
     for sponsor_tier_content in customer_sponsor_tier_contents:
         content = sponsor_tier_content.content
         if content.content_type == content_type and content.id not in viewed:
-            customer_sponsor_contents.append(content.id)
+            customer_sponsor_contents.append(content)
     free_content = Content.objects.filter(content_type=content_type, is_paid=False)
     customer_free_content = []
     for content in free_content:
         if content.id not in viewed:
-            customer_free_content.append(content.id)
+            customer_free_content.append(content)
     if customer_mongo["keywords"] != {}:
         customer_keywords = customer_mongo["keywords"]
         customer_sponsor_contents_rate = []
         for i in customer_sponsor_contents:
             content = [i]
-            content_mongo = collection_content.find_one({"content_id": i})
+            if content_type == "article":
+                content_mongo = collection_content.find_one({"content_id": i.id})
+            else:
+                content_mongo = collection_content.find_one({"content_id": str(i.id)})
             content_keywords = content_mongo["keywords"]
             rate = 0
             for word in content_keywords:
                 if word in customer_keywords.keys():
                     rate += customer_keywords["word"]
             content.append(rate)
-            content_sql = Content.objects.get(id=i)
-            content.append(content_sql.like_count)
+            content.append(i.like_count)
             customer_sponsor_contents_rate.append(content)
-        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1], x[2]))
+        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1], x[2]), reverse=True)
         customer_sponsor_contents = []
         for i in customer_sponsor_contents_rate:
             customer_sponsor_contents.append(i[0])
         customer_free_contents_rate = []
         for i in customer_free_content:
             content = [i]
-            if content_type == "video":
-                content_mongo = collection_content.find_one({"content_id": str(i)})
+            if content_type == "video" or content_type == "short":
+                content_mongo = collection_content.find_one({"content_id": str(i.id)})
             else:
-                content_mongo = collection_content.find_one({"content_id": i})
+                content_mongo = collection_content.find_one({"content_id": i.id})
             content_keywords = content_mongo["keywords"]
             rate = 0
             for word in content_keywords:
                 if word in customer_keywords.keys():
                     rate += customer_keywords[word]
             content.append(rate)
-            content_sql = Content.objects.get(id=i)
-            content.append(content_sql.like_count)
+            content.append(i.like_count)
             customer_free_contents_rate.append(content)
         customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1], x[2]), reverse=True)
         customer_free_content = []
@@ -1227,9 +1225,7 @@ def api_get_customer_content_view(request, content_type, customer_id):
     else:
         customer_sponsor_contents_rate = []
         for i in customer_sponsor_contents:
-            content = [i]
-            content_sql = Content.objects.get(id=i)
-            content.append(content_sql.like_count)
+            content = [i, i.like_count]
             customer_sponsor_contents_rate.append(content)
         customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1]), reverse=True)
         customer_sponsor_contents = []
@@ -1237,17 +1233,77 @@ def api_get_customer_content_view(request, content_type, customer_id):
             customer_sponsor_contents.append(i[0])
         customer_free_contents_rate = []
         for i in customer_free_content:
-            content = [i]
-            content_sql = Content.objects.get(id=i)
-            content.append(content_sql.like_count)
+            content = [i, i.like_count]
             customer_free_contents_rate.append(content)
-        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1]))
+        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1]), reverse=True)
         customer_free_content = []
         for i in customer_free_contents_rate:
             customer_free_content.append(i[0])
     customer_content = customer_sponsor_contents + customer_free_content
+    final_list = []
+    collection_creator = mongodb_name["creator_info"]
+    if content_type == "article":
+        for cont in customer_content:
+            cont_mongo = collection_content.find_one({"content_id": cont.id})
+            creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
+            creator = Creator.objects.get(id=cont.creator.id_id)
+            user = User.objects.get(id=creator.id_id)
+            avatar = creator_mongo["avatar"]
+            if avatar != "NO":
+                avatar = base64.b64encode(avatar).decode('utf-8')
+            content = {
+                "content_id": cont.id,
+                "article_name": cont_mongo["article_name"],
+                "text": cont_mongo["text"],
+                "creator_id": creator.id_id,
+                "username": user.username,
+                "avatar": avatar
+
+            }
+            final_list.append(content)
+    elif content_type == "videos":
+        for cont in customer_content:
+            cont_mongo = collection_content.find_one({"content_id": cont.id})
+            creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
+            creator = Creator.objects.get(id=cont.creator.id_id)
+            user = User.objects.get(id=creator.id_id)
+            avatar = creator_mongo["avatar"]
+            if avatar != "NO":
+                avatar = base64.b64encode(avatar).decode('utf-8')
+            preview_bytes = cont_mongo['preview']
+            encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+
+            content = {
+                "content_id": cont.id,
+                "video_name": cont_mongo["video_name"],
+                "preview": encoded_preview,
+                "creator_id": creator.id_id,
+                "username": user.username,
+                "avatar": avatar
+
+            }
+            final_list.append(content)
+    else:
+        for cont in customer_content:
+            cont_mongo = collection_content.find_one({"content_id": cont.id})
+            creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
+            creator = Creator.objects.get(id=cont.creator.id_id)
+            user = User.objects.get(id=creator.id_id)
+            avatar = creator_mongo["avatar"]
+            if avatar != "NO":
+                avatar = base64.b64encode(avatar).decode('utf-8')
+            content = {
+                "content_id": cont.id,
+                "video_name": cont_mongo["video_name"],
+                "creator_id": creator.id_id,
+                "username": user.username,
+                "avatar": avatar
+
+            }
+            final_list.append(content)
+
     data = {
-        "contents": customer_content
+        "contents": final_list
     }
     return Response(data)
 
