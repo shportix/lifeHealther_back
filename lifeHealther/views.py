@@ -1297,9 +1297,12 @@ def api_create_content_like_view(request):
                     customer_keywords[i] += 1
                 else:
                     customer_keywords[i] = 1
+            content.like_count += 1
+            content.save()
             collection_customer.update_one({"customer_id": customer_id}, {'$set': {"keywords": customer_keywords}})
             data = {
-                "id": content_like.id
+                "id": content_like.id,
+                "like_count": content.like_count
             }
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1365,9 +1368,11 @@ def api_delete_content_like_view(request, content_like_id):
             customer_keywords[i] -= 1
     collection_customer.update_one({"customer_id": customer_id}, {'$set': {"keywords": customer_keywords}})
     operation = content_like.delete()
+    content.like_count -= 1
+    content.save()
     data = {}
     if operation:
-        data["success"] = "delete successful"
+        data["like_count"] = content.like_count
     else:
         data["failure"] = "delete failed"
     return Response(data=data)
