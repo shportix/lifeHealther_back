@@ -1301,6 +1301,22 @@ def api_get_creators_articles_content_view(request, creator_id):
 
 
 @api_view(['GET', ])
+def api_get_creators_sponsor_tiers_view(request, creator_id):
+    try:
+        creator = Creator.objects.get(id=creator_id)
+        sponsor_tiers = SponsorTier.objects.filter(creator=creator)
+    except Creator.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        data = {}
+        k = 0
+        for i in sponsor_tiers:
+            data[k] = SponsorTierSerializer(i).data
+            k += 1
+        return Response(data)
+
+
+@api_view(['GET', ])
 def api_get_creators_videos_content_view(request, creator_id):
     try:
         creator = Creator.objects.get(id=creator_id)

@@ -102,7 +102,8 @@ from lifeHealther.views import (
     api_get_sponsor_tier_mongo_view,
     api_update_sponsor_tier_mongo_view,
     api_get_sponsor_tier_creator_content,
-    api_get_sponsor_tier_creator_no_content
+    api_get_sponsor_tier_creator_no_content,
+    api_get_creators_sponsor_tiers_view
 )
 
 urlpatterns = [
@@ -210,7 +211,8 @@ urlpatterns = [
     path('sponsor_tier/mongo/update/<int:sponsor_tier_id>', api_update_sponsor_tier_mongo_view),
 #     sponsor_tier_else
     path('sponsor_tier/creator/content/<int:sponsor_tier_id>', api_get_sponsor_tier_creator_content),
-    path('sponsor_tier/creator/content/no/<int:sponsor_tier_id>', api_get_sponsor_tier_creator_no_content)
+    path('sponsor_tier/creator/content/no/<int:sponsor_tier_id>', api_get_sponsor_tier_creator_no_content),
+    path('sponsor_tier/creator/<int:creator_id>', api_get_creators_sponsor_tiers_view)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
