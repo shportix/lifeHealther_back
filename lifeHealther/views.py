@@ -1235,13 +1235,43 @@ def api_delete_comment_like_view(request, comment_like_id):
 # //////content_like//////
 @api_view(['POST', ])
 def api_create_content_like_view(request):
+    logging.basicConfig(level=logging.DEBUG)
     content_like = ContentLike()
 
     if request.method == "POST":
+        collection_customer = mongodb_name["customer_info"]
+        customer_id = request.data["customer_id"]
+        content_id = request.data["content_id"]
         serializer = ContentLikeSerializer(content_like, data=request.data)
+        customer = Customer.objects.get(id=customer_id)
+        content = Content.objects.get(id=content_id)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            content_like = ContentLike.objects.create(customer=customer,
+                                                      content=content)
+            if content.content_type == "article":
+                collection_content = mongodb_name["articles"]
+                logging.debug("article")
+            elif content.content_type == "video":
+                collection_content = mongodb_name["videos"]
+                logging.debug("video")
+            else:
+                logging.debug("short")
+                collection_content = mongodb_name["shorts"]
+            logging.debug(content_id)
+            content_mongo = collection_content.find_one({"content_id": str(content_id)})
+            content_keywords = content_mongo["keywords"]
+            customer_mongo = collection_customer.find_one({"customer_id": customer_id})
+            customer_keywords = customer_mongo["keywords"]
+            for i in content_keywords:
+                if i in customer_keywords.keys():
+                    customer_keywords[i] += 1
+                else:
+                    customer_keywords[i] = 0
+            collection_customer.update_one({"customer_id": customer_id}, {'$set': {"keywords": customer_keywords}})
+            data = {
+                "id": content_like.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -153,12 +153,12 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ContentLikeSerializer(serializers.HyperlinkedModelSerializer):
-    customer = serializers.RelatedField(read_only=True)
-    content = serializers.RelatedField(read_only=True)
+    customer_id = serializers.RelatedField(read_only=True)
+    content_id = serializers.RelatedField(read_only=True)
 
     class Meta:
         model = ContentLike
-        fields = ['id', 'customer', 'content']
+        fields = ['id', 'customer_id', 'content_id']
 
     def create(self, validated_data):
         customer = Customer.objects.get(id=int(validated_data.pop('customer')))
