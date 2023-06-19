@@ -1731,9 +1731,17 @@ def api_create_sponsor_tier_content_view(request):
 
     if request.method == "POST":
         serializer = SponsorTierContentSerializer(sponsor_tier_content, data=request.data)
+        content = Content.objects.get(id=request.data["content"])
+        sponsor_tier = SponsorTier.objects.get(id=request.data["sponsor_tier"])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            sponsor_tier_content = SponsorTierContent.objects.create(content=content,
+                                                                     sponsor_tier=sponsor_tier)
+            content.is_paid = True
+            content.save()
+            data = {
+                "id": sponsor_tier_content.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
