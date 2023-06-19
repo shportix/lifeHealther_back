@@ -316,15 +316,10 @@ def api_create_creator_mongo_view(request):
 @api_view(['POST', ])
 def api_create_sponsor_tier_mongo_view(request):
     collection_name = mongodb_name["sponsor_tier"]
-    try:
-
-        creator = {
-            "sponsor_tier_id": request.data["sponsor_tier_id"],
-            "info": requests.data["info"]
-        }
-
-    except Exception:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    creator = {
+        "sponsor_tier_id": request.data["sponsor_tier_id"],
+        "info": requests.data["info"]
+    }
     collection_name.insert_one(creator)
     return  Response(status=status.HTTP_201_CREATED)
 
