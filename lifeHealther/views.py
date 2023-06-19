@@ -1776,9 +1776,11 @@ def api_update_sponsor_tier_content_view(request, sponsor_tier_content_id):
 
 
 @api_view(['DELETE', ])
-def api_delete_sponsor_tier_content_view(request, sponsor_tier_content_id):
+def api_delete_sponsor_tier_content_view(request, content_id, sponsor_tier_id):
     try:
-        sponsor_tier_content = SponsorTierContent.objects.get(id=sponsor_tier_content_id)
+        content = Content.objects.get(id=content_id)
+        sponsor_tier = SponsorTier.objects.get(id=sponsor_tier_id)
+        sponsor_tier_content = SponsorTierContent.objects.get(content=content,sponsor_tier=sponsor_tier)
     except SponsorTierContent.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
