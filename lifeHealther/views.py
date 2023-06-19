@@ -1267,7 +1267,7 @@ def api_create_content_like_view(request):
                 if i in customer_keywords.keys():
                     customer_keywords[i] += 1
                 else:
-                    customer_keywords[i] = 0
+                    customer_keywords[i] = 1
             collection_customer.update_one({"customer_id": customer_id}, {'$set': {"keywords": customer_keywords}})
             data = {
                 "id": content_like.id
@@ -1312,15 +1312,36 @@ def api_delete_content_like_view(request, content_like_id):
         content_like = ContentLike.objects.get(id=content_like_id)
     except ContentLike.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == "DELETE":
-        operation = content_like.delete()
-        data = {}
-        if operation:
-            data["success"] = "delete successful"
-        else:
-            data["failure"] = "delete failed"
-        return Response(data=data)
+    collection_customer = mongodb_name["customer_info"]
+    customer = content_like.customer
+    content = content_like.content
+    customer_id = customer.id_id
+    content_id = content.id
+    if content.content_type == "article":
+        collection_content = mongodb_name["articles"]
+        logging.debug("article")
+    elif content.content_type == "video":
+        collection_content = mongodb_name["videos"]
+        logging.debug("video")
+    else:
+        logging.debug("short")
+        collection_content = mongodb_name["shorts"]
+    logging.debug(content_id)
+    content_mongo = collection_content.find_one({"content_id": str(content_id)})
+    content_keywords = content_mongo["keywords"]
+    customer_mongo = collection_customer.find_one({"customer_id": customer_id})
+    customer_keywords = customer_mongo["keywords"]
+    for i in content_keywords:
+        if i in customer_keywords.keys():
+            customer_keywords[i] -= 1
+    collection_customer.update_one({"customer_id": customer_id}, {'$set': {"keywords": customer_keywords}})
+    operation = content_like.delete()
+    data = {}
+    if operation:
+        data["success"] = "delete successful"
+    else:
+        data["failure"] = "delete failed"
+    return Response(data=data)
 
 
 # //////sponsor_tier//////
