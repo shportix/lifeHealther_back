@@ -229,6 +229,21 @@ def api_create_creator_mongo_view(request):
     return  Response(status=status.HTTP_201_CREATED)
 
 @api_view(['POST', ])
+def api_create_sponsor_tier_mongo_view(request):
+    collection_name = mongodb_name["sponsor_tier"]
+    try:
+
+        creator = {
+            "sponsor_tier_id": request.data["sponsor_tier_id"],
+            "info": requests.data["info"]
+        }
+
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    collection_name.insert_one(creator)
+    return  Response(status=status.HTTP_201_CREATED)
+
+@api_view(['POST', ])
 def api_create_customer_mongo_view(request):
     collection_name = mongodb_name["customer_info"]
     try:
@@ -285,6 +300,21 @@ def api_customer_viewed_mongo_view(request, customer_id):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return  Response(status=status.HTTP_201_CREATED)
 
+@api_view(['PUT', ])
+def api_update_sponsor_tier_mongo_view(request, sponsor_tier_id):
+    collection_name = mongodb_name["sponsor_tier"]
+    try:
+        customer_mongo = collection_name.find_one({"sponsor_tier_id": sponsor_tier_id})
+        query = {"sponsor_tier_id": sponsor_tier_id}
+        update = {'$set': {
+            "info": request.data["info"]
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    return  Response(status=status.HTTP_201_CREATED)
 
 @api_view(['GET', ])
 def api_get_creator_mongo_view(request, creator_id):
@@ -299,6 +329,20 @@ def api_get_creator_mongo_view(request, creator_id):
         "creator_id": creator_data["creator_id"],
         "avatar": avatar,
         "diplomas": creator_data["diplomas"]
+    }
+    # except Exception:
+    #     return Response(status=status.HTTP_404_NOT_FOUND)
+    return  Response(data=creator_data, status=status.HTTP_200_OK)
+
+@api_view(['GET', ])
+def api_get_sponsor_tier_mongo_view(request, sponsor_tier_id):
+
+    collection_name = mongodb_name["sponsor_tier"]
+    # try:
+    creator_data = collection_name.find_one({"sponsor_tier_id": int(sponsor_tier_id)})
+    creator_data = {
+        "sponsor_tier_id": creator_data["sponsor_tier_id"],
+        "info": creator_data["info"]
     }
     # except Exception:
     #     return Response(status=status.HTTP_404_NOT_FOUND)

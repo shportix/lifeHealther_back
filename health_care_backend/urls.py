@@ -98,6 +98,9 @@ from lifeHealther.views import (
     api_delete_short_view,
     api_find_short_info_view,
     api_update_short_mongo_view,
+    api_create_sponsor_tier_mongo_view,
+    api_get_sponsor_tier_mongo_view,
+    api_update_sponsor_tier_mongo_view
 )
 
 urlpatterns = [
@@ -198,7 +201,11 @@ urlpatterns = [
     path('customer/mongo/<int:customer_id>', api_get_customer_mongo_view),
     path('customer/subs/<int:customer_id>', api_get_customer_subs_view),
     path('customer/viewed/<int:customer_id>', api_customer_viewed_mongo_view),
-    path('recomendetion/<str:content_type>/<int:customer_id>', api_get_customer_content_view)
+    path('recomendetion/<str:content_type>/<int:customer_id>', api_get_customer_content_view),
+#     sponsor tier mongo
+    path('sponsor_tier/mongo/create', api_create_sponsor_tier_mongo_view),
+    path('sponsor_tier/mongo/<int:sponsor_tier_id>', api_get_sponsor_tier_mongo_view),
+    path('sponsor_tier/mongo/update/<int:sponsor_tier_id>', api_update_sponsor_tier_mongo_view)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
