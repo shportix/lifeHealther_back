@@ -1290,7 +1290,6 @@ def api_get_customer_content_view(request, content_type, customer_id):
             cont_mongo = collection_content.find_one({"content_id": str(cont.id)})
             creator_mongo = collection_creator.find_one({"creator_id": cont.creator.id_id})
             creator = Creator.objects.get(id=cont.creator.id_id)
-            user = User.objects.get(id=creator.id_id)
             avatar = creator_mongo["avatar"]
             if avatar != "NO":
                 avatar = base64.b64encode(avatar).decode('utf-8')
@@ -1298,7 +1297,6 @@ def api_get_customer_content_view(request, content_type, customer_id):
                 "content_id": cont.id,
                 "video_name": cont_mongo["video_name"],
                 "creator_id": creator.id_id,
-                "username": user.username,
                 "avatar": avatar,
                 "like_count": cont.like_count
 
