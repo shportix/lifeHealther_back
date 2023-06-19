@@ -49,6 +49,77 @@ from lifeHealther.api.serializers import (
 
 
 @api_view(['GET', ])
+def api_get_sponsor_tier_creator_content(request, sponsor_tier_id):
+    sponsor_tier = SponsorTier.objects.get(id=sponsor_tier_id)
+    sponsor_tier_contents = SponsorTierContent.objects.filter(sponsor_tier=sponsor_tier)
+    contents = []
+    for sp_t_con in sponsor_tier_contents:
+        contents.append(sp_t_con.content)
+    data = {}
+    k = 0
+    for cont in contents:
+        content_type = cont.content_type
+        if content_type == "article":
+            collection_name = mongodb_name["articles"]
+            article = collection_name.find_one({"content_id": int(cont.id)})
+            content_name = article["article_name"]
+        elif content_type == "video":
+            collection_name = mongodb_name["videos"]
+            article = collection_name.find_one({"content_id": str(cont.id)})
+            content_name = article["video_name"]
+        else:
+            collection_name = mongodb_name["shorts"]
+            article = collection_name.find_one({"content_id": str(cont.id)})
+            content_name = article["video_name"]
+
+        buf = {
+            "content_id": cont.id,
+            "content_type": content_type,
+            "content_name": content_name
+        }
+        data[k] = buf
+        k += 1
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+def api_get_sponsor_tier_creator_no_content(request, sponsor_tier_id):
+    sponsor_tier = SponsorTier.objects.get(id=sponsor_tier_id)
+    creator = sponsor_tier.creator
+    sponsor_tier_contents = SponsorTierContent.objects.filter(sponsor_tier=sponsor_tier)
+    contents = []
+    for sp_t_con in sponsor_tier_contents:
+        contents.append(sp_t_con.content)
+    creator_contents = Content.objects.filter(creator=creator)
+    data = {}
+    k = 0
+    for cont in creator_contents:
+        if cont not in contents:
+            content_type = cont.content_type
+            if content_type == "article":
+                collection_name = mongodb_name["articles"]
+                article = collection_name.find_one({"content_id": int(cont.id)})
+                content_name = article["article_name"]
+            elif content_type == "video":
+                collection_name = mongodb_name["videos"]
+                article = collection_name.find_one({"content_id": str(cont.id)})
+                content_name = article["video_name"]
+            else:
+                collection_name = mongodb_name["shorts"]
+                article = collection_name.find_one({"content_id": str(cont.id)})
+                content_name = article["video_name"]
+
+            buf = {
+                "content_id": cont.id,
+                "content_type": content_type,
+                "content_name": content_name
+            }
+            data[k] = buf
+            k += 1
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
 def api_login_view(request):
     username = request.GET["username"]
     password = request.GET["password"]
