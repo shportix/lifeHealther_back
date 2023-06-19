@@ -226,7 +226,7 @@ def api_get_creator_mongo_view(request, creator_id):
     creator_data = {
         "creator_id": creator_data["creator_id"],
         "avatar": avatar,
-        "diplomas": creator_data["diplomas"]
+        "diplomas": creator_data["diplomas"],
     }
     # except Exception:
     #     return Response(status=status.HTTP_404_NOT_FOUND)
