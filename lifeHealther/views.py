@@ -214,6 +214,27 @@ def api_update_creator_avatar_mongo_view(request, creator_id):
     return  Response(status=status.HTTP_201_CREATED)
 
 
+@api_view(['PUT', ])
+def api_customer_viewed_mongo_view(request, customer_id):
+    collection_name = mongodb_name["customer_info"]
+    try:
+        content_id = request.data["content_id"]
+        customer_mongo = collection_name.find_one({"customer_id": customer_id})
+        viewed = customer_mongo["viewed"]
+        if content_id not in viewed:
+            viewed.append(content_id)
+        query = {"customer_id": customer_id}
+        update = {'$set': {
+            "viewed": viewed
+        }}
+
+        # Оновлення одного документа, який задовільняє умову
+        result = collection_name.update_one(query, update)
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    return  Response(status=status.HTTP_201_CREATED)
+
+
 @api_view(['GET', ])
 def api_get_creator_mongo_view(request, creator_id):
 

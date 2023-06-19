@@ -89,7 +89,8 @@ from lifeHealther.views import (
     api_login_view,
     api_create_customer_mongo_view,
     api_get_customer_mongo_view,
-    api_get_customer_subs_view
+    api_get_customer_subs_view,
+    api_customer_viewed_mongo_view
 )
 
 urlpatterns = [
@@ -178,7 +179,8 @@ urlpatterns = [
     path('login', api_login_view),
     path('customer_mongo/create', api_create_customer_mongo_view),
     path('customer/mongo/<int:customer_id>', api_get_customer_mongo_view),
-    path('customer/subs/<int:customer_id>', api_get_customer_subs_view)
+    path('customer/subs/<int:customer_id>', api_get_customer_subs_view),
+    path('customer/viewed/<int:customer_id>', api_customer_viewed_mongo_view)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
