@@ -1019,6 +1019,7 @@ def api_get_customer_subs_view(request, customer_id):
         if avatar != "NO":
             avatar = base64.b64encode(avatar).decode('utf-8')
         creator_data = {
+            "id": creator_id,
             "avatar": avatar,
             "username": user.username
 
