@@ -926,8 +926,7 @@ def api_get_content_view(request, content_id):
 
 
 @api_view(['GET', ])
-def api_get_customer_content_view(request, customer_id):
-    content_type = requests.GET["content_type"]
+def api_get_customer_content_view(request, content_type, customer_id):
     collection_name = mongodb_name["customer_info"]
     if content_type == "article":
         collection_content = mongodb_name["articles"]
@@ -975,17 +974,20 @@ def api_get_customer_content_view(request, customer_id):
         customer_free_contents_rate = []
         for i in customer_free_content:
             content = [i]
-            content_mongo = collection_content.find_one({"content_id": i})
+            if content_type == "video":
+                content_mongo = collection_content.find_one({"content_id": str(i)})
+            else:
+                content_mongo = collection_content.find_one({"content_id": i})
             content_keywords = content_mongo["keywords"]
             rate = 0
             for word in content_keywords:
                 if word in customer_keywords.keys():
-                    rate += customer_keywords["word"]
+                    rate += customer_keywords[word]
             content.append(rate)
             content_sql = Content.objects.get(id=i)
             content.append(content_sql.like_count)
             customer_free_contents_rate.append(content)
-        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1], x[2]))
+        customer_free_contents_rate = sorted(customer_free_contents_rate, key=lambda x: (x[1], x[2]), reverse=True)
         customer_free_content = []
         for i in customer_free_contents_rate:
             customer_free_content.append(i[0])
@@ -996,7 +998,7 @@ def api_get_customer_content_view(request, customer_id):
             content_sql = Content.objects.get(id=i)
             content.append(content_sql.like_count)
             customer_sponsor_contents_rate.append(content)
-        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1]))
+        customer_sponsor_contents_rate = sorted(customer_sponsor_contents_rate, key=lambda x: (x[1]), reverse=True)
         customer_sponsor_contents = []
         for i in customer_sponsor_contents_rate:
             customer_sponsor_contents.append(i[0])
