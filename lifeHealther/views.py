@@ -1619,15 +1619,23 @@ def api_create_comment_view(request):
 
 
 @api_view(['GET', ])
-def api_get_comment_view(request, comment_id):
+def api_get_comment_view(request, content_id):
     try:
-        comment = Comment.objects.get(id=comment_id)
+        content = Content.objects.get(id=content_id)
+        comments = Comment.objects.filter(content=content_id)
     except Comment.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = ContentSerializer(comment)
-        return Response(serializer.data)
+        data = []
+        for i in comments:
+            author = User.objects.get(id=i.customer.id_id)
+            comm = {
+                "username": author.username,
+                "text": i.text
+            }
+            data.append(comm)
+        return Response(data)
 
 
 @api_view(['PUT', ])

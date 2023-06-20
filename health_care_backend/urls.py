@@ -139,7 +139,7 @@ urlpatterns = [
     path('content/<int:content_id>/delete', api_delete_content_view),
     path('content/<int:content_id>/update', api_update_content_view),
     path('comment/create', api_create_comment_view),
-    path('comment/<int:comment_id>', api_get_comment_view),
+    path('comment/<int:content_id>', api_get_comment_view),
     path('comment/<int:comment_id>/delete', api_delete_comment_view),
     path('comment/<int:comment_id>/update', api_update_comment_view),
     path('comment_like/create', api_create_comment_like_view),
