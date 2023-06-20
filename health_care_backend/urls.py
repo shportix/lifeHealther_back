@@ -145,10 +145,12 @@ urlpatterns = [
     path('comment_like/<int:comment_like_id>', api_get_comment_like_view),
     path('comment_like/<int:comment_like_id>/delete', api_delete_comment_like_view),
     path('comment_like/<int:comment_like_id>/update', api_update_comment_like_view),
+
     path('content_like/create', api_create_content_like_view),
-    path('content_like/<int:content_like_id>', api_get_content_like_view),
+    path('content_like/<int:content_id>/<int:customer_id>', api_get_content_like_view),
     path('content_like/<int:content_like_id>/delete', api_delete_content_like_view),
     path('content_like/<int:content_like_id>/update', api_update_content_like_view),
+
     path('sponsor_tier/create', api_create_sponsor_tier_view),
     path('sponsor_tier/<int:sponsor_tier_id>', api_get_sponsor_tier_view),
     path('sponsor_tier/<int:sponsor_tier_id>/delete', api_delete_sponsor_tier_view),

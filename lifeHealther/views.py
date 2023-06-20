@@ -1646,9 +1646,11 @@ def api_create_content_like_view(request):
 
 
 @api_view(['GET', ])
-def api_get_content_like_view(request, content_like_id):
+def api_get_content_like_view(request, content_id, customer_id):
     try:
-        content_like = ContentLike.objects.get(id=content_like_id)
+        content = Content.objects.get(id=content_id)
+        customer = Customer.objects.get(id=customer_id)
+        content_like = ContentLike.objects.get(content=content,customer=customer)
     except ContentLike.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
