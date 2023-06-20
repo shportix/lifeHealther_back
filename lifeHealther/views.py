@@ -1679,14 +1679,14 @@ def api_update_content_like_view(request, content_like_id):
 
 
 @api_view(['DELETE', ])
-def api_delete_content_like_view(request, content_like_id):
+def api_delete_content_like_view(request, content_id, customer_id):
     try:
-        content_like = ContentLike.objects.get(id=content_like_id)
+        content = Content.objects.get(id=content_id)
+        customer = Customer.objects.get(id=customer_id)
+        content_like = ContentLike.objects.get(content=content,customer=customer)
     except ContentLike.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     collection_customer = mongodb_name["customer_info"]
-    customer = content_like.customer
-    content = content_like.content
     customer_id = customer.id_id
     content_id = content.id
     if content.content_type == "article":

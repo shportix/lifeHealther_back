@@ -148,7 +148,7 @@ urlpatterns = [
 
     path('content_like/create', api_create_content_like_view),
     path('content_like/<int:content_id>/<int:customer_id>', api_get_content_like_view),
-    path('content_like/<int:content_like_id>/delete', api_delete_content_like_view),
+    path('content_like/delete/<int:content_id>/<int:customer_id>', api_delete_content_like_view),
     path('content_like/<int:content_like_id>/update', api_update_content_like_view),
 
     path('sponsor_tier/create', api_create_sponsor_tier_view),
