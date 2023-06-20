@@ -138,11 +138,13 @@ def api_load_creator(request, creator_id, customer_id):
     collection_tier = mongodb_name["sponsor_tier"]
     for sp_t in sponsor_tiers:
         sp_mongo = collection_tier.find_one({"sponsor_tier_id": sp_t.id})
+        subbed = sp_t in customer_sponsor_tiers
         sp_data = {
             "sponsor_tier_id": sp_t.id,
             "name": sp_t.name,
             "price": sp_t.price,
-            "info": sp_mongo["info"]
+            "info": sp_mongo["info"],
+            "subbed": subbed
         }
         sponsor_tiers_info.append(sp_data)
     data["sponsor_tiers"] = sponsor_tiers_info
