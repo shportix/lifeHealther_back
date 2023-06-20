@@ -49,6 +49,120 @@ from lifeHealther.api.serializers import (
 
 
 @api_view(['GET', ])
+def api_load_creator(creator_id, customer_id):
+    data = {}
+    videos_info = []
+    shorts_info = []
+    articles_info = []
+    sponsor_tiers_info = []
+    diplomas_info = []
+    collection_creator = mongodb_name["creator_info"]
+    creator_mongo = collection_creator.find_one({"creator_id": int(creator_id)})
+    creator = Creator.objects.get(id=creator_id)
+    user = User.objects.get(id=creator_id)
+    customer = Customer.objects.get(id=customer_id)
+    try:
+        Subscription.objects.get(creator=creator, customer=customer)
+        subscribed = True
+    except Subscription.DoesNotExist:
+        subscribed = False
+    data["subscribed"] = subscribed
+    data["username"] = user.username
+    data["info"] = creator.info
+    avatar = creator_mongo["avatar"]
+    if avatar != "NO":
+        avatar = base64.b64encode(avatar).decode('utf-8')
+    data["avatar"] = avatar
+    videos = Content.objects.filter(creator=creator, content_type="video")
+    articles = Content.objects.filter(creator=creator, content_type="article")
+    shorts = Content.objects.filter(creator=creator, content_type="short")
+    sponsor_tiers = SponsorTier.objects.filter(creator=creator)
+    collection_content = mongodb_name["videos"]
+    customer_sponsor_subs = SponsorSubscription.objects.filter(customer=customer)
+    customer_sponsor_tiers = []
+    for i in customer_sponsor_subs:
+        customer_sponsor_tiers.append(i.sponsor_tier)
+    customer_sponsor_tier_cont = SponsorTierContent.objects.filter(sponsor_tier__in=customer_sponsor_tiers)
+    customer_sponsor_cont = []
+    for i in customer_sponsor_tier_cont:
+        customer_sponsor_cont.append(i.content)
+    for cont in videos:
+        accessed = True
+        if cont.is_paid and cont not in customer_sponsor_cont:
+            accessed = False
+        if accessed:
+            content_data = {
+                "content_id": cont.id,
+                "is_paid": cont.is_paid,
+                "like_count": cont.like_count
+            }
+            cont_mongo = collection_content.find_one({"content_id": str(cont.id)})
+            preview = base64.b64encode(cont_mongo["preview"]).decode('utf-8')
+            content_data["preview"] = preview
+            content_data["title"] = cont_mongo["video_name"]
+            videos_info.append(content_data)
+    data["videos"] = videos_info
+    collection_content = mongodb_name["shorts"]
+    for cont in shorts:
+        accessed = True
+        if cont.is_paid and cont not in customer_sponsor_cont:
+            accessed = False
+        if accessed:
+            content_data = {
+                "content_id": cont.id,
+                "is_paid": cont.is_paid,
+                "like_count": cont.like_count
+            }
+            cont_mongo = collection_content.find_one({"content_id": str(cont.id)})
+            preview = base64.b64encode(cont_mongo["preview"]).decode('utf-8')
+            content_data["preview"] = preview
+            content_data["title"] = cont_mongo["video_name"]
+            shorts_info.append(content_data)
+    data["shorts"] = shorts_info
+    collection_content = mongodb_name["articles"]
+    for cont in articles:
+        accessed = True
+        if cont.is_paid and cont not in customer_sponsor_cont:
+            accessed = False
+        if accessed:
+            content_data = {
+                "content_id": cont.id,
+                "is_paid": cont.is_paid,
+                "like_count": cont.like_count
+            }
+            cont_mongo = collection_content.find_one({"content_id": int(cont.id)})
+            content_data["headline"] = cont_mongo["article_name"]
+            content_data["text"] = cont_mongo["text"]
+            articles_info.append(content_data)
+    data["articles"] = articles_info
+    collection_tier = mongodb_name["sponsor_tier"]
+    for sp_t in sponsor_tiers:
+        sp_mongo = collection_tier.find_one({"sponsor_tier": sp_t.id})
+        sp_data = {
+            "sponsor_tier_id": sp_t.id,
+            "name": sp_t.name,
+            "price": sp_t.price,
+            "info": sp_mongo["info"]
+        }
+        sponsor_tiers_info.append(sp_data)
+    data["sponsor_tiers"] = sponsor_tiers_info
+    collection_diploma = mongodb_name["diploma"]
+    diplomas = creator_mongo["diplomas"]
+    for diploma_id in diplomas:
+        diploma = collection_diploma.find_one({'_id': ObjectId(diploma_id)})
+        preview_bytes = diploma["diploma_file"]
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        diploma_data = {
+            "file": encoded_preview,
+        }
+        diplomas_info.append(diploma_data)
+    data["diplomas"] = diplomas_info
+    return Response(data)
+
+
+
+
+@api_view(['GET', ])
 def api_get_sponsor_tier_creator_content(request, sponsor_tier_id):
     sponsor_tier = SponsorTier.objects.get(id=sponsor_tier_id)
     sponsor_tier_contents = SponsorTierContent.objects.filter(sponsor_tier=sponsor_tier)
