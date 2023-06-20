@@ -205,9 +205,26 @@ class CommentLikeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SponsorSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
+    customer = serializers.RelatedField(read_only=True)
+    sponsor_tier = serializers.RelatedField(read_only=True)
     class Meta:
         model = SponsorSubscription
         fields = ['id', 'customer', 'sponsor_tier']
+
+    def create(self, validated_data):
+        sponsor_tier = SponsorTier.objects.get(id=int(validated_data.pop('sponsor_tier')))
+        customer = Customer.objects.get(id=int(validated_data.pop('customer')))
+        sponsor_sub, created = Content.objects.update_or_create(sponsor_tier=sponsor_tier,
+                                                            customer=customer)
+        return sponsor_sub
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "sponsor_tier": instance.sponsor_tier.id,
+            "customer": instance.customer.id_id,
+        }
+        return representation
 
 
 class SponsorTierContentSerializer(serializers.HyperlinkedModelSerializer):

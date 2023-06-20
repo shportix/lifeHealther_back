@@ -162,7 +162,7 @@ urlpatterns = [
     path('sponsor_tier_content/<int:sponsor_tier_content_id>/update', api_update_sponsor_tier_content_view),
     path('sponsor_subscription/create', api_create_sponsor_subscription_view),
     path('sponsor_subscription/<int:sponsor_subscription_id>', api_get_sponsor_subscription_view),
-    path('sponsor_subscription/<int:sponsor_subscription_id>/delete', api_delete_sponsor_subscription_view),
+    path('sponsor_subscription/delete/<int:sponsor_tier_id>/<int:customer_id>', api_delete_sponsor_subscription_view),
     path('sponsor_subscription/<int:sponsor_subscription_id>/update', api_update_sponsor_subscription_view),
     path('subscription/create', api_create_subscription_view),
     path('subscription/<int:subscription_id>', api_get_subscription_view),

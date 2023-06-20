@@ -1987,9 +1987,15 @@ def api_create_sponsor_subscription_view(request):
 
     if request.method == "POST":
         serializer = SponsorSubscriptionSerializer(sponsor_subscription, data=request.data)
+        customer = Customer.objects.get(id=request.data["customer"])
+        sponsor_tier = SponsorTier.objects.get(id=request.data["sponsor_tier"])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            sponsor_sub = SponsorSubscription.objects.create(customer=customer,
+                                                             sponsor_tier=sponsor_tier)
+            data = {
+                "id": sponsor_sub.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -2024,9 +2030,11 @@ def api_update_sponsor_subscription_view(request, sponsor_subscription_id):
 
 
 @api_view(['DELETE', ])
-def api_delete_sponsor_subscription_view(request, sponsor_subscription_id):
+def api_delete_sponsor_subscription_view(request, sponsor_tier_id, customer_id):
     try:
-        sponsor_subscription = SponsorSubscription.objects.get(id=sponsor_subscription_id)
+        sponsor_tier = SponsorTier.objects.get(id=sponsor_tier_id)
+        customer = Customer.objects.get(id=customer_id)
+        sponsor_subscription = SponsorSubscription.objects.get(customer=customer, sponsor_tier=sponsor_tier)
     except SponsorSubscription.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -2036,7 +2044,7 @@ def api_delete_sponsor_subscription_view(request, sponsor_subscription_id):
         if operation:
             data["success"] = "delete successful"
         else:
-            data["failure"] = "delete failed"
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(data=data)
 
 
