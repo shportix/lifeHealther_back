@@ -49,7 +49,7 @@ from lifeHealther.api.serializers import (
 
 
 @api_view(['GET', ])
-def api_load_creator(creator_id, customer_id):
+def api_load_creator(request, creator_id, customer_id):
     data = {}
     videos_info = []
     shorts_info = []
@@ -137,7 +137,7 @@ def api_load_creator(creator_id, customer_id):
     data["articles"] = articles_info
     collection_tier = mongodb_name["sponsor_tier"]
     for sp_t in sponsor_tiers:
-        sp_mongo = collection_tier.find_one({"sponsor_tier": sp_t.id})
+        sp_mongo = collection_tier.find_one({"sponsor_tier_id": sp_t.id})
         sp_data = {
             "sponsor_tier_id": sp_t.id,
             "name": sp_t.name,
