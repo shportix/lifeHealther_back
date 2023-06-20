@@ -179,7 +179,7 @@ class ContentLikeSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         customer = Customer.objects.get(id=int(validated_data.pop('customer')))
         content = Content.objects.get(id=int(validated_data.pop('content')))
-        like, created = Content.objects.update_or_create(customer=customer,
+        like, created = ContentLike.objects.update_or_create(customer=customer,
                                                             content=content)
         return like
 
@@ -193,9 +193,30 @@ class ContentLikeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
+    customer = serializers.RelatedField(read_only=True)
+    content = serializers.RelatedField(read_only=True)
     class Meta:
         model = Comment
-        fields = ['id', 'customer', 'text', 'like count', 'content']
+        fields = ['id', 'customer', 'text', 'like_count', 'content']
+
+    def create(self, validated_data):
+        customer = Customer.objects.get(id=int(validated_data.pop('customer')))
+        content = Content.objects.get(id=int(validated_data.pop('content')))
+        comment, created = Comment.objects.update_or_create(customer=customer,
+                                                         content=content,
+                                                            text=validated_data.pop('text'),
+                                                            like_count=validated_data.pop('like_count'))
+        return comment
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "customer": instance.customer.id_id,
+            "content": instance.content.id,
+            "text": instance.text,
+            "like_count": instance.like_count
+        }
+        return representation
 
 
 class CommentLikeSerializer(serializers.HyperlinkedModelSerializer):

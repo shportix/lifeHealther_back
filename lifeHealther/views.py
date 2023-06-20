@@ -1602,9 +1602,19 @@ def api_create_comment_view(request):
 
     if request.method == "POST":
         serializer = CommentSerializer(comment, data=request.data)
+        customer = Customer.objects.get(id=request.data["customer"])
+        text = request.data["text"]
+        like_count = request.data["like_count"]
+        content = Content.objects.get(id=request.data["content"])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            comment = Comment.objects.create(customer=customer,
+                                            content=content,
+                                            text=text,
+                                            like_count=like_count)
+            data = {
+                "id": comment.id
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
