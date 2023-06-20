@@ -1625,7 +1625,10 @@ def api_create_content_like_view(request):
                 logging.debug("short")
                 collection_content = mongodb_name["shorts"]
             logging.debug(content_id)
-            content_mongo = collection_content.find_one({"content_id": str(content_id)})
+            if content.content_type == "article":
+                content_mongo = collection_content.find_one({"content_id": int(content_id)})
+            else:
+                content_mongo = collection_content.find_one({"content_id": str(content_id)})
             content_keywords = content_mongo["keywords"]
             customer_mongo = collection_customer.find_one({"customer_id": customer_id})
             customer_keywords = customer_mongo["keywords"]
