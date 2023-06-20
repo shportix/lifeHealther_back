@@ -1657,7 +1657,7 @@ def api_get_content_like_view(request, content_id, customer_id):
 
     if request.method == "GET":
         serializer = ContentLikeSerializer(content_like)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT', ])
