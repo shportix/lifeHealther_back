@@ -2089,9 +2089,11 @@ def api_update_subscription_view(request, subscription_id):
 
 
 @api_view(['DELETE', ])
-def api_delete_subscription_view(request, subscription_id):
+def api_delete_subscription_view(request, creator_id, customer_id):
     try:
-        subscription = Subscription.objects.get(id=subscription_id)
+        creator = Creator.objects.get(id=creator_id)
+        customer = Customer.objects.get(id=customer_id)
+        subscription = Subscription.objects.get(creator=creator,customer=customer)
     except Subscription.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

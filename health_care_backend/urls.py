@@ -166,7 +166,7 @@ urlpatterns = [
     path('sponsor_subscription/<int:sponsor_subscription_id>/update', api_update_sponsor_subscription_view),
     path('subscription/create', api_create_subscription_view),
     path('subscription/<int:subscription_id>', api_get_subscription_view),
-    path('subscription/<int:subscription_id>/delete', api_delete_subscription_view),
+    path('subscription/delete/<int:creator_id>/<int:customer_id>', api_delete_subscription_view),
     path('subscription/<int:subscription_id>/update', api_update_subscription_view),
     # path('test_mongo',api_create_test_mongo_view),
     path('article/create', api_create_article_mongo_view),
