@@ -1344,15 +1344,20 @@ def api_create_moderator_view(request):
     moderator = Moderator()
 
     if request.method == "POST":
-        serializer = ModeratorSerializer(moderator, data=request.data)
-        if serializer.is_valid():
-            customer = serializer.create(validated_data=request.data)
-            data = {
-                "id": customer.id_id
-            }
-            serializer.save()
-            return Response(data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.data["username"]
+        password = request.data["password"]
+        role =request.data["role"]
+        firstName =request.data["firstName"]
+        lastName =request.data["lastName"]
+        user = User.objects.create(username=username, password=password)
+        my_user = MyUser.objects.create(id=user, role=role)
+        moder = Moderator.objects.create(id=my_user, firstName=firstName, lastName=lastName)
+        data = {
+            "id": moder.id_id
+        }
+
+        return Response(data, status=status.HTTP_201_CREATED)
+    return Response( status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])
