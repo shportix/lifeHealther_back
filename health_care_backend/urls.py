@@ -227,8 +227,8 @@ urlpatterns = [
 
     path("fined/<int:customer_id>/<str:keyword>", api_fined_view),
     path("moder/diplomas", api_get_moder_diplomas),
-    path("diploma/delete", api_delete_diploma),
-    path("diploma/update", api_update_diploma)
+    path("diploma/delete/<str:diploma_id>", api_delete_diploma),
+    path("diploma/update/<str:diploma_id>", api_update_diploma)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
