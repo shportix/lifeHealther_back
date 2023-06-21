@@ -1924,15 +1924,17 @@ def api_create_comment_like_view(request):
 
 
 @api_view(['GET', ])
-def api_get_comment_like_view(request, comment_like_id):
+def api_get_comment_like_view(request, comment_id, customer_id):
     try:
-        comment_like = CommentLike.objects.get(id=comment_like_id)
+        comment = Comment.objects.get(id=comment_id)
+        customer = Customer.objects.get(id=customer_id)
+        comment_like = CommentLike.objects.get(comment=comment, customer=customer)
     except CommentLike.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
         serializer = ContentLikeSerializer(comment_like)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT', ])
@@ -1954,9 +1956,11 @@ def api_update_comment_like_view(request, comment_like_id):
 
 
 @api_view(['DELETE', ])
-def api_delete_comment_like_view(request, comment_like_id):
+def api_delete_comment_like_view(request, comment_id, customer_id):
     try:
-        comment_like = CommentLike.objects.get(id=comment_like_id)
+        comment = Comment.objects.get(id=comment_id)
+        customer = Customer.objects.get(id=customer_id)
+        comment_like = CommentLike.objects.get(comment=comment, customer=customer)
     except CommentLike.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
