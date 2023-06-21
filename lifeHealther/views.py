@@ -71,6 +71,25 @@ def api_get_moder_diplomas(request):
 def api_delete_diploma(request, diploma_id):
     collection_name = mongodb_name["diploma"]
     r = collection_name.delete_one({'_id': ObjectId(diploma_id)})
+    collection_name = mongodb_name["creator_info"]
+    query = {
+        'diplomas': {
+            '$elemMatch': {
+                '$eq': diploma_id
+            }
+        }
+    }
+    r = collection_name.find_one(query)
+    dips = r["diplomas"]
+    new_dips = []
+    for dip in dips:
+        if dip != diploma_id:
+            new_dips.append(dip)
+    query = {'creator_id': r["creator_id"]}
+    update = {'$set': {
+        "diplomas": new_dips
+    }}
+    result = collection_name.update_one(query, update)
     return Response(status=status.HTTP_200_OK)
 
 @api_view(['PUT', ])
