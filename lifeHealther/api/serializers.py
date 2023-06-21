@@ -76,8 +76,8 @@ class ModeratorSerializer(serializers.HyperlinkedModelSerializer):
         my_user_data = validated_data.pop('id')
         id = MyUserSerializer.create(MyUserSerializer(), validated_data=my_user_data)
         moder, created = Moderator.objects.update_or_create(id=id,
-                                                                firstName=validated_data.pop('firstName'),
-                                                                lastName=validated_data.pop('lastName'))
+                                                            firstName=validated_data.pop('firstName'),
+                                                            lastName=validated_data.pop('lastName'))
         return moder
 
 

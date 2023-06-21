@@ -1346,8 +1346,12 @@ def api_create_moderator_view(request):
     if request.method == "POST":
         serializer = ModeratorSerializer(moderator, data=request.data)
         if serializer.is_valid():
+            customer = serializer.create(validated_data=request.data)
+            data = {
+                "id": customer.id_id
+            }
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
