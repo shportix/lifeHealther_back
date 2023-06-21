@@ -132,7 +132,10 @@ def api_load_creator(request, creator_id, customer_id):
             }
             cont_mongo = collection_content.find_one({"content_id": int(cont.id)})
             content_data["headline"] = cont_mongo["article_name"]
-            content_data["text"] = cont_mongo["text"]
+            text = cont_mongo["text"]
+            if len(text) > 115:
+                text = text[:115] + "..."
+            content_data["text"] = text
             articles_info.append(content_data)
     data["articles"] = articles_info
     collection_tier = mongodb_name["sponsor_tier"]
