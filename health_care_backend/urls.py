@@ -106,7 +106,8 @@ from lifeHealther.views import (
     api_get_creators_sponsor_tiers_view,
     api_delete_sponsor_tier_view,
     api_load_creator,
-    api_fined_view
+    api_fined_view,
+    api_get_moder_diplomas
 )
 
 urlpatterns = [
@@ -222,7 +223,8 @@ urlpatterns = [
 
     path('load_creator/<int:creator_id>/<int:customer_id>', api_load_creator),
 
-    path("fined/<int:customer_id>/<str:keyword>", api_fined_view)
+    path("fined/<int:customer_id>/<str:keyword>", api_fined_view),
+    path("moder/diplomas", api_get_moder_diplomas)
 ]
 
 urlpatterns += staticfiles_urlpatterns()

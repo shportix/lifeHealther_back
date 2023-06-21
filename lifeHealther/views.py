@@ -9,7 +9,6 @@ from django.db.models import Q
 import logging
 from health_care_backend.settings import mongodb_client, mongodb_name, fs
 from bson.json_util import dumps
-import requests
 from bson.binary import Binary
 from bson.objectid import ObjectId
 import base64
@@ -46,6 +45,27 @@ from lifeHealther.api.serializers import (
     SponsorTierContentSerializer,
     RegistrationSerializers
 )
+
+
+@api_view(['GET', ])
+def api_get_moder_diplomas(request):
+    collection_name = mongodb_name["diploma"]
+    diplomas = []
+    diplomas_mongo = collection_name.find({"is_valid": False})
+    for dip in diplomas_mongo:
+        preview_bytes = dip["diploma_file"]
+        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+        data = {
+            "id": str(dip["_id"]),
+            "file": encoded_preview,
+            
+        }
+        diplomas.append(data)
+    data = {
+        "diplomas":diplomas
+    }
+    return Response(data=data)
+
 
 
 @api_view(['GET', ])
