@@ -370,12 +370,13 @@ def api_load_creator(request, creator_id, customer_id):
     diplomas = creator_mongo["diplomas"]
     for diploma_id in diplomas:
         diploma = collection_diploma.find_one({'_id': ObjectId(diploma_id)})
-        preview_bytes = diploma["diploma_file"]
-        encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
-        diploma_data = {
-            "file": encoded_preview,
-        }
-        diplomas_info.append(diploma_data)
+        if diploma["is_valid"]:
+            preview_bytes = diploma["diploma_file"]
+            encoded_preview = base64.b64encode(preview_bytes).decode('utf-8')
+            diploma_data = {
+                "file": encoded_preview,
+            }
+            diplomas_info.append(diploma_data)
     data["diplomas"] = diplomas_info
     return Response(data)
 
