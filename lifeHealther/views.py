@@ -58,13 +58,20 @@ def api_get_moder_diplomas(request):
         data = {
             "id": str(dip["_id"]),
             "file": encoded_preview,
-            
+
         }
         diplomas.append(data)
     data = {
         "diplomas":diplomas
     }
     return Response(data=data)
+
+
+@api_view(['DELETE', ])
+def api_delete_diploma(request, diploma_id):
+    collection_name = mongodb_name["diploma"]
+    r = collection_name.delete_one({'_id': ObjectId(diploma_id)})
+    return Response(status=status.HTTP_200_OK)
 
 
 
