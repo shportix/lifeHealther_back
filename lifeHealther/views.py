@@ -73,6 +73,19 @@ def api_delete_diploma(request, diploma_id):
     r = collection_name.delete_one({'_id': ObjectId(diploma_id)})
     return Response(status=status.HTTP_200_OK)
 
+@api_view(['PUT', ])
+def api_update_diploma(request, diploma_id):
+    collection_name = mongodb_name["diploma"]
+    query = {'_id': ObjectId(diploma_id)}
+    update = {'$set': {
+        "is_valid": True
+    }}
+
+    # Оновлення одного документа, який задовільняє умову
+    result = collection_name.update_one(query, update)
+    return Response(status=status.HTTP_200_OK)
+
+
 
 
 @api_view(['GET', ])

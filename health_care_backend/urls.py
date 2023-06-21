@@ -108,7 +108,8 @@ from lifeHealther.views import (
     api_load_creator,
     api_fined_view,
     api_get_moder_diplomas,
-    api_delete_diploma
+    api_delete_diploma,
+    api_update_diploma
 )
 
 urlpatterns = [
@@ -226,7 +227,8 @@ urlpatterns = [
 
     path("fined/<int:customer_id>/<str:keyword>", api_fined_view),
     path("moder/diplomas", api_get_moder_diplomas),
-    path("diploma/delete", api_delete_diploma)
+    path("diploma/delete", api_delete_diploma),
+    path("diploma/update", api_update_diploma)
 ]
 
 urlpatterns += staticfiles_urlpatterns()
