@@ -220,9 +220,19 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CommentLikeSerializer(serializers.HyperlinkedModelSerializer):
+    customer = serializers.RelatedField(read_only=True)
+    comment = serializers.RelatedField(read_only=True)
     class Meta:
         model = CommentLike
         fields = ['id', 'customer', 'comment']
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "customer": instance.customer.id_id,
+            "comment": instance.comment.id,
+        }
+        return representation
 
 
 class SponsorSubscriptionSerializer(serializers.HyperlinkedModelSerializer):

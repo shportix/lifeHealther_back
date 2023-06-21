@@ -228,7 +228,11 @@ urlpatterns = [
     path("fined/<int:customer_id>/<str:keyword>", api_fined_view),
     path("moder/diplomas", api_get_moder_diplomas),
     path("diploma/delete/<str:diploma_id>", api_delete_diploma),
-    path("diploma/update/<str:diploma_id>", api_update_diploma)
+    path("diploma/update/<str:diploma_id>", api_update_diploma),
+
+    path('comment_like/create', api_create_comment_like_view),
+    path('comment_like/<int:comment_id>/<int:customer_id>', api_get_content_like_view),
+    path('comment_like/delete/<int:comment_id>/<int:customer_id>', api_delete_content_like_view),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

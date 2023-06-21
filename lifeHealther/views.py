@@ -1860,7 +1860,8 @@ def api_get_comment_view(request, content_id):
             author = User.objects.get(id=i.customer.id_id)
             comm = {
                 "username": author.username,
-                "text": i.text
+                "text": i.text,
+                "id": i.id
             }
             data.append(comm)
         return Response(data)
@@ -1907,10 +1908,18 @@ def api_create_comment_like_view(request):
     comment_like = CommentLike()
 
     if request.method == "POST":
+        customer_id = request.data["customer"]
+        comment_id = request.data["comment"]
         serializer = CommentLikeSerializer(comment_like, data=request.data)
+        customer = Customer.objects.get(id=customer_id)
+        comment = Comment.objects.get(id=comment_id)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            content_like = CommentLike.objects.create(customer=customer,
+                                                      comment=comment)
+            data = {
+                "id": content_like.id,
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
