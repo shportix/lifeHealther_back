@@ -105,8 +105,8 @@ WSGI_APPLICATION = 'health_care_backend.wsgi.application'
 
 
 DATABASES = {
-    # 'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
-    'default': dj_database_url.parse("postgres://lifehealtherdb_bdac_user:vXdOZhoysusPiXL5QFJ3kdOvWkWRpX9k@dpg-chtne67dvk4olit3ptng-a.frankfurt-postgres.render.com/lifehealtherdb_bdac")
+    'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
+    # 'default': dj_database_url.parse("postgres://lifehealtherdb_bdac_user:vXdOZhoysusPiXL5QFJ3kdOvWkWRpX9k@dpg-chtne67dvk4olit3ptng-a.frankfurt-postgres.render.com/lifehealtherdb_bdac")
 }
 
 
